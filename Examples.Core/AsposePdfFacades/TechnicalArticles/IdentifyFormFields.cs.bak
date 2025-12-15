@@ -1,0 +1,81 @@
+using System;
+using System.IO;
+using System.Drawing;
+using Aspose.Pdf.Facades;
+using Aspose.Pdf.Annotations;
+
+namespace Examples.Core.AsposePdfFacades.TechnicalArticles;
+
+/// <summary>
+/// Demonstrates how to identify form fields in a PDF and add new text fields based on their locations.
+/// </summary>
+public class IdentifyFormFields
+{
+    /// <summary>
+    /// Executes the example.
+    /// </summary>
+    public static void Run()
+    {
+        try
+        {
+            // Resolve input and output directories relative to the application base directory.
+            string baseDir = AppContext.BaseDirectory;
+            string inputDir = Path.Combine(baseDir, "data", "inputs");
+            string outputDir = Path.Combine(baseDir, "data", "outputs");
+
+            // Ensure the directories exist.
+            Directory.CreateDirectory(inputDir);
+            Directory.CreateDirectory(outputDir);
+
+            // Input PDF files.
+            string filledFormPath = Path.Combine(inputDir, "FilledForm.pdf");
+            string filledForm2Path = Path.Combine(inputDir, "FilledForm - 2.pdf");
+
+            // Load the first PDF containing filled form fields.
+            Form form = new Form(filledFormPath);
+
+            // Retrieve all field names.
+            string[] allFields = form.FieldNames;
+
+            // Store the location rectangles of each field.
+            Rectangle[] boxes = new Rectangle[allFields.Length];
+            for (int i = 0; i < allFields.Length; i++)
+            {
+                // Get the appearance attributes of each field.
+                FormFieldFacade facade = form.GetFieldFacade(allFields[i]);
+                // Box holds the field's location.
+                boxes[i] = facade.Box;
+            }
+
+            // Save the original PDF (unchanged) to the output folder.
+            string outPdf1 = Path.Combine(outputDir, "IdentifyFormFields_1_out.pdf");
+            form.Save(outPdf1);
+
+            // Load the second PDF where new fields will be added.
+            Document doc = new Document(filledForm2Path);
+            FormEditor editor = new FormEditor(doc);
+
+            // Add a new text field beneath each existing form field.
+            for (int i = 0; i < allFields.Length; i++)
+            {
+                editor.AddField(
+                    FieldType.Text,
+                    "TextField" + i,
+                    allFields[i],
+                    1,
+                    boxes[i].Left,
+                    boxes[i].Top,
+                    boxes[i].Left + 50,
+                    boxes[i].Top + 10);
+            }
+
+            // Save the modified PDF to the output folder.
+            string outPdf2 = Path.Combine(outputDir, "IdentifyFormFields_out.pdf");
+            editor.Save(outPdf2);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error executing IdentifyFormFields example: {ex.Message}");
+        }
+    }
+}

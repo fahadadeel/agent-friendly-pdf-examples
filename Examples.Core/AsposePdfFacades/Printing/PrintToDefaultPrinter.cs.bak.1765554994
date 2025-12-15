@@ -1,0 +1,113 @@
+using System;
+using System.IO;
+using Aspose.Pdf;
+using Aspose.Pdf.Facades;
+using Aspose.Pdf.Printing;
+using Aspose.Pdf.Devices;
+
+namespace Examples.Core.AsposePdfFacades.Printing;
+
+public class PrintToDefaultPrinter
+{
+    /// <summary>
+    /// Prints a PDF document to the default printer using Aspose.Pdf.Facades.
+    /// </summary>
+    public static void Run()
+    {
+        try
+        {
+            // Resolve input PDF path (data/inputs/input.pdf)
+            string inputPath = Path.Combine(AppContext.BaseDirectory, "data", "inputs", "input.pdf");
+
+            // Create PdfViewer object
+            PdfViewer viewer = new PdfViewer();
+
+            // Open input PDF file
+            viewer.BindPdf(inputPath);
+
+            // Set attributes for printing
+            viewer.AutoResize = true;       // Print the file with adjusted size
+            viewer.AutoRotate = true;       // Print the file with adjusted rotation
+            viewer.PrintPageDialog = false; // Do not produce the page number dialog when printing
+
+            // Create objects for printer and page settings and PrintDocument
+            var printerSettings = new PrinterSettings();
+            var pageSettings = new PageSettings();
+            var printDocument = new System.Drawing.Printing.PrintDocument();
+
+            // Set printer name
+            printerSettings.PrinterName = printDocument.PrinterSettings.PrinterName;
+
+            // Set PageSize (if required)
+            pageSettings.PaperSize = new PaperSize("A4", 827, 1169);
+
+            // Set PageMargins (if required)
+            pageSettings.Margins = new Margins(0, 0, 0, 0);
+
+            // Print document using printer and page settings
+            viewer.PrintDocumentWithSettings(pageSettings, printerSettings);
+
+            // Close the PDF file after printing
+            viewer.Close();
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error during printing: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// Shows a print dialog before printing the PDF document.
+    /// </summary>
+    public static void ShowPrintDialog()
+    {
+        try
+        {
+            // Resolve input PDF path (data/inputs/input.pdf)
+            string inputPath = Path.Combine(AppContext.BaseDirectory, "data", "inputs", "input.pdf");
+
+            // Create PdfViewer object
+            PdfViewer viewer = new PdfViewer();
+
+            // Open input PDF file
+            viewer.BindPdf(inputPath);
+
+            // Set attributes for printing
+            viewer.AutoResize = true;       // Print the file with adjusted size
+            viewer.AutoRotate = true;       // Print the file with adjusted rotation
+            viewer.PrintPageDialog = false; // Do not produce the page number dialog when printing
+
+            // Create objects for printer and page settings and PrintDocument
+            var printerSettings = new PrinterSettings();
+            var pageSettings = new PageSettings();
+            var printDocument = new System.Drawing.Printing.PrintDocument();
+
+            // Set printer name
+            printerSettings.PrinterName = printDocument.PrinterSettings.PrinterName;
+
+            // Set PageSize (if required)
+            pageSettings.PaperSize = new PaperSize("A4", 827, 1169);
+
+            // Set PageMargins (if required)
+            pageSettings.Margins = new Margins(0, 0, 0, 0);
+
+            // Show print dialog (platform‑specific UI)
+            // TODO: GUI code removed — preserve original behavior or implement platform-specific UI
+            // The following code uses Windows Forms which may not be available on all platforms.
+            // If needed, replace with appropriate cross‑platform dialog handling.
+            var printDialog = new System.Windows.Forms.PrintDialog();
+            if (printDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                // Print document using printer and page settings
+                viewer.PrintDocumentWithSettings(pageSettings, printerSettings);
+            }
+
+            // Close the PDF file after printing
+            viewer.Close();
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error during print dialog operation: {ex.Message}");
+        }
+    }
+}

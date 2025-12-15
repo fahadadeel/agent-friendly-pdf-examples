@@ -1,0 +1,94 @@
+using System;
+using System.IO;
+using Aspose.Pdf;
+using Aspose.Pdf.Text;
+using Aspose.Pdf.Facades;
+using System.Drawing;
+
+namespace Examples.Core.AsposePDF.Text;
+
+/// <summary>
+/// Demonstrates searching text with a regular expression and adding hyperlinks to the found fragments.
+/// </summary>
+public class SearchTextAndAddHyperlink
+{
+    /// <summary>
+    /// Executes the example.
+    /// </summary>
+    public static void Run()
+    {
+        // Resolve input and output directories relative to the application base directory.
+        string baseDir = AppContext.BaseDirectory;
+        string inputDir = Path.Combine(baseDir, "data", "inputs");
+        string outputDir = Path.Combine(baseDir, "data", "outputs");
+        Directory.CreateDirectory(outputDir);
+
+        string inputPath = Path.Combine(inputDir, "SearchRegularExpressionPage.pdf");
+        string outputPath = Path.Combine(outputDir, "SearchTextAndAddHyperlink_out.pdf");
+
+        try
+        {
+            // Create absorber object to find all instances of the input search phrase.
+            TextFragmentAbsorber absorber = new TextFragmentAbsorber("\\d{4}-\\d{4}");
+            // Enable regular expression search.
+            absorber.TextSearchOptions = new TextSearchOptions(true);
+
+            // Open document.
+            PdfContentEditor editor = new PdfContentEditor();
+            editor.BindPdf(inputPath);
+
+            // Accept the absorber for the first page (pages are 1‑based).
+            editor.Document.Pages[1].Accept(absorber);
+
+            int[] dashArray = { };
+            string[] LEArray = { };
+            Color blue = Color.Blue;
+
+            // Loop through the fragments.
+            foreach (TextFragment textFragment in absorber.TextFragments)
+            {
+                textFragment.TextState.ForegroundColor = Aspose.Pdf.Color.Blue;
+
+                Rectangle rect = new Rectangle(
+                    (int)textFragment.Rectangle.LLX,
+                    (int)Math.Round(textFragment.Rectangle.LLY),
+                    (int)Math.Round(textFragment.Rectangle.Width + 2),
+                    (int)Math.Round(textFragment.Rectangle.Height + 1));
+
+                Enum[] actionName = new Enum[2]
+                {
+                    Aspose.Pdf.Annotations.PredefinedAction.Document_AttachFile,
+                    Aspose.Pdf.Annotations.PredefinedAction.Document_ExtractPages
+                };
+
+                // Add a web link to the rectangle.
+                editor.CreateWebLink(rect, "http://www.aspose.com", 1, blue, actionName);
+
+                // Draw a line under the text fragment.
+                editor.CreateLine(
+                    rect,
+                    "",
+                    (float)textFragment.Rectangle.LLX + 1,
+                    (float)textFragment.Rectangle.LLY - 1,
+                    (float)textFragment.Rectangle.URX,
+                    (float)textFragment.Rectangle.LLY - 1,
+                    1,
+                    1,
+                    blue,
+                    "S",
+                    dashArray,
+                    LEArray);
+            }
+
+            // Save the modified document.
+            editor.Save(outputPath);
+            editor.Close();
+
+            Console.WriteLine($"\nText replaced and hyperlink added successfully based on a regular expression.\nFile saved at {outputPath}");
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"An error occurred while processing the PDF: {ex.Message}");
+        }
+    }
+}

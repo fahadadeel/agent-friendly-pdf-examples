@@ -1,0 +1,68 @@
+using System;
+using System.IO;
+using Aspose.Pdf;
+using Aspose.Pdf.Facades;
+using System.Collections;
+using Aspose.Pdf.Forms;
+using System.Drawing;
+
+namespace Examples.Core.AsposePdfFacades.Security_Signatures;
+
+public class DigitallySignature
+{
+    /// <summary>
+    /// Demonstrates digitally signing a PDF using Aspose.Pdf.Facades.
+    /// </summary>
+    public static void Run()
+    {
+        try
+        {
+            // Resolve input and output directories relative to the application base directory.
+            string baseDir = AppContext.BaseDirectory;
+            string inputDir = Path.Combine(baseDir, "data", "inputs");
+            string outputDir = Path.Combine(baseDir, "data", "outputs");
+
+            // Ensure output directory exists.
+            Directory.CreateDirectory(outputDir);
+
+            // Path to the PDF to be signed.
+            string inputPdfPath = Path.Combine(inputDir, "DigitallySign.pdf");
+            // Path to the signature appearance image.
+            string appearancePath = Path.Combine(inputDir, "aspose-logo.jpg");
+            // Path to the PKCS#1 certificate file (PFX). Adjust the file name as needed.
+            string pbxFile = Path.Combine(inputDir, "certificate.pfx"); // TODO: verify certificate file name
+
+            // Create PdfFileSignature object and bind the input PDF.
+            var pdfSign = new PdfFileSignature();
+            pdfSign.BindPdf(inputPdfPath);
+
+            // Set signature appearance.
+            pdfSign.SignatureAppearance = appearancePath;
+
+            // Define the rectangle where the signature will be placed.
+            // System.Drawing.Rectangle is used; on non‑Windows platforms ensure System.Drawing.Common is referenced.
+            var rect = new Rectangle(100, 100, 200, 100);
+
+            // Create the PKCS#1 signature object.
+            var signature = new PKCS1(pbxFile, "password"); // TODO: replace password with actual value
+
+            // Sign the first page (page number 1).
+            pdfSign.Sign(
+                pageNumber: 1,
+                reason: "Signature Reason",
+                contact: "Contact",
+                location: "Location",
+                visible: true,
+                rectangle: rect,
+                signature: signature);
+
+            // Save the signed PDF to the output directory.
+            string outputPdfPath = Path.Combine(outputDir, "DigitallySignature_out.pdf");
+            pdfSign.Save(outputPdfPath);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error: {ex.Message}");
+        }
+    }
+}

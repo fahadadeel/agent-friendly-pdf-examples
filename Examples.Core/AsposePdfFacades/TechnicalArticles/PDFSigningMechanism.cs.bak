@@ -1,0 +1,145 @@
+using System;
+using System.Collections;
+using System.IO;
+using System.Drawing;
+using Aspose.Pdf.Facades;
+using Aspose.Pdf.Forms;
+
+namespace Examples.Core.AsposePdfFacades.TechnicalArticles;
+
+public class PDFSigningMechanism
+{
+    /// <summary>
+    /// Demonstrates signing a PDF document using a PKCS#1 certificate.
+    /// </summary>
+    public static void Run()
+    {
+        try
+        {
+            // Resolve input and output paths
+            string inputPdf = GetInputPath("inFile.pdf");
+            string signatureImage = GetInputPath("aspose-logo.jpg");
+            string pkcs1File = GetInputPath("inFile2.pdf"); // certificate file
+            string outputPdf = GetOutputPath("Signed_out.pdf");
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPdf)!);
+
+            // Load the PDF document
+            Document doc = new Document(inputPdf);
+
+            // Create PdfFileSignature object and bind input and output PDF files
+            PdfFileSignature pdfSign = new PdfFileSignature(doc);
+
+            // Create a rectangle for signature location
+            Rectangle rect = new Rectangle(100, 100, 200, 100);
+
+            // Set signature appearance
+            pdfSign.SignatureAppearance = signatureImage;
+
+            // Create the PKCS#1 signature object
+            PKCS1 signature = new PKCS1(pkcs1File, "password");
+
+            // Sign the document (page 1)
+            pdfSign.Sign(1, "Signature Reason", "Alice", "Odessa", true, rect, signature);
+
+            // Save the signed PDF
+            pdfSign.Save(outputPdf);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error in Run: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// Adds signature fields to a PDF and signs them.
+    /// </summary>
+    public static void AddSignatureFields()
+    {
+        try
+        {
+            // Resolve input and output paths
+            string inputPdf = GetInputPath("inFile.pdf");
+            string inputPdf2 = GetInputPath("inFile2.pdf");
+            string filledFormPdf = GetInputPath("FilledForm.pdf");
+            string pkcs1File1 = GetInputPath("inFile1.pdf");
+            string pkcs1File2 = GetInputPath("FilledForm - 2.pfx");
+
+            // Output files
+            string out1 = GetOutputPath("AddSignatureFields_1_out.pdf");
+            string out2 = GetOutputPath("AddSignatureFields_2_out.pdf");
+            string out3 = GetOutputPath("AddSignatureFields_3_out.pdf");
+
+            // Ensure output directories exist
+            Directory.CreateDirectory(Path.GetDirectoryName(out1)!);
+            Directory.CreateDirectory(Path.GetDirectoryName(out2)!);
+            Directory.CreateDirectory(Path.GetDirectoryName(out3)!);
+
+            // Load the first document and add signature fields
+            Document doc = new Document(inputPdf);
+            FormEditor editor = new FormEditor(doc);
+            editor.AddField(FieldType.Signature, "Signature from Alice", 1, 10, 10, 110, 110);
+            editor.AddField(FieldType.Signature, "Signature from John", 1, 120, 150, 220, 250);
+            editor.AddField(FieldType.Signature, "Signature from Smith", 1, 300, 200, 400, 300);
+            editor.Save(out1);
+
+            // Sign one of the fields in the second document
+            Document doc2 = new Document(inputPdf2);
+            PdfFileSignature pdfSign = new PdfFileSignature(doc2);
+            pdfSign.Sign("Signature from John", "Signature Reason", "John", "Kharkov", new PKCS1(pkcs1File1, "password"));
+            pdfSign.Save(out2);
+
+            // Sign a field in the third document
+            Document doc3 = new Document(filledFormPdf);
+            PdfFileSignature pdfSign2 = new PdfFileSignature(doc3);
+            pdfSign2.Sign("Signature from Alice", "Signature Reason", "Alice", "Odessa", new PKCS1(pkcs1File2, "password"));
+            pdfSign2.Save(out3);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error in AddSignatureFields: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// Verifies signatures present in a PDF document.
+    /// </summary>
+    public static void VerifySignatures()
+    {
+        try
+        {
+            // Resolve input path
+            string inputPdf = GetInputPath("inFile.pdf");
+
+            // Create PdfFileSignature object and bind the PDF
+            PdfFileSignature pdfVerify = new PdfFileSignature();
+            pdfVerify.BindPdf(inputPdf);
+
+            // Check if PDF contains any signature
+            bool isSigned = pdfVerify.ContainsSignature();
+            Console.WriteLine($"Document signed: {isSigned}");
+
+            // Verify signatures by name
+            bool isSignatureVerified = pdfVerify.VerifySignature("Signature1");
+            Console.WriteLine($"Signature1 verified: {isSignatureVerified}");
+
+            bool isSignatureVerified2 = pdfVerify.VerifySignature("Signature from Alice");
+            Console.WriteLine($"Signature from Alice verified: {isSignatureVerified2}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error in VerifySignatures: {ex.Message}");
+        }
+    }
+
+    // Helper methods for path resolution
+    private static string GetInputPath(string fileName) =>
+        Path.Combine(AppContext.BaseDirectory, "data", "inputs", fileName);
+
+    private static string GetOutputPath(string fileName) =>
+        Path.Combine(AppContext.BaseDirectory, "data", "outputs", fileName);
+}
+
+// TODO: import or include helper class RunExamples from original source if needed. 
+// TODO: platform-specific API — review and implement with guard for System.Drawing if targeting non‑Windows platforms.

@@ -1,0 +1,85 @@
+using System;
+using System.IO;
+using Aspose.Pdf;
+using Aspose.Pdf.Facades;
+// TODO: System.Drawing usage may be platform‑specific; ensure appropriate package reference
+using System.Drawing;
+
+namespace Examples.Core.AsposePdfFacades.Stamps_Watermarks;
+
+/// <summary>
+/// Demonstrates adding a text stamp to a specific page of a PDF using Aspose.Pdf.Facades.
+/// </summary>
+public class AddTextStampPage
+{
+    /// <summary>
+    /// Executes the example.
+    /// </summary>
+    public static void Run()
+    {
+        string? inputPath = null;
+        string? outputPath = null;
+        PdfFileStamp? fileStamp = null;
+
+        try
+        {
+            // Resolve input and output paths relative to the application base directory.
+            string baseDir = AppContext.BaseDirectory;
+            inputPath = Path.Combine(baseDir, "data", "inputs", "AddTextStamp-Page.pdf");
+            string outputDir = Path.Combine(baseDir, "data", "outputs");
+            outputPath = Path.Combine(outputDir, "AddTextStamp-Page_out.pdf");
+
+            // Ensure the output directory exists.
+            Directory.CreateDirectory(outputDir);
+
+            // Create PdfFileStamp object.
+            fileStamp = new PdfFileStamp();
+
+            // Open Document.
+            fileStamp.BindPdf(inputPath);
+
+            // Create stamp.
+            var stamp = new Stamp();
+            var formattedText = new FormattedText(
+                "Hello World!",
+                Color.Blue,
+                Color.Gray,
+                FontStyle.Helvetica,
+                EncodingType.Winansi,
+                true,
+                14);
+            stamp.BindLogo(formattedText);
+            stamp.SetOrigin(200, 200);
+            stamp.Rotation = 90.0F;
+            stamp.IsBackground = true;
+
+            // Set particular pages (page numbers are 1‑based).
+            stamp.Pages = new int[] { 1 };
+
+            // Add stamp to PDF file.
+            fileStamp.AddStamp(stamp);
+
+            // Save updated PDF file.
+            fileStamp.Save(outputPath);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error in AddTextStampPage: {ex.Message}");
+        }
+        finally
+        {
+            // Close the PdfFileStamp if it was created.
+            if (fileStamp != null)
+            {
+                try
+                {
+                    fileStamp.Close();
+                }
+                catch (Exception closeEx)
+                {
+                    Console.Error.WriteLine($"Error closing PdfFileStamp: {closeEx.Message}");
+                }
+            }
+        }
+    }
+}

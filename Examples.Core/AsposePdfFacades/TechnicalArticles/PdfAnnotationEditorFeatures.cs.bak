@@ -1,0 +1,79 @@
+using System;
+using System.Collections;
+using System.IO;
+using Aspose.Pdf;
+using Aspose.Pdf.Annotations;
+using Aspose.Pdf.Facades;
+using System.Drawing; // TODO: platform-specific API — review and implement with guard
+
+namespace Examples.Core.AsposePdfFacades.TechnicalArticles;
+
+public class PdfAnnotationEditorFeatures
+{
+    /// <summary>
+    /// Demonstrates annotation editing features using Aspose.Pdf.Facades.
+    /// </summary>
+    public static void Run()
+    {
+        try
+        {
+            // Resolve base directories
+            string baseDir = AppContext.BaseDirectory;
+            string inputDir = Path.Combine(baseDir, "data", "inputs");
+            string outputDir = Path.Combine(baseDir, "data", "outputs");
+
+            // Ensure output directory exists
+            if (!Directory.Exists(outputDir))
+                Directory.CreateDirectory(outputDir);
+
+            // Input and output file paths
+            string inputPath = Path.Combine(inputDir, "inFile.pdf");
+            string inputPath2 = Path.Combine(inputDir, "inFile2.pdf");
+            string outputPath = Path.Combine(outputDir, "PdfAnnotationEditorFeatures_out.pdf");
+
+            // Create an object of PdfAnnotationEditor class
+            PdfAnnotationEditor editor = new PdfAnnotationEditor();
+
+            // Bind input PDF file
+            editor.BindPdf(inputPath);
+
+            // Create a new FreeTextAnnotation to modify annotation attributes
+            FreeTextAnnotation annotation = new FreeTextAnnotation(
+                editor.Document.Pages[1],
+                new Rectangle(200, 400, 400, 600),
+                new DefaultAppearance("TimesNewRoman", 14, Color.Orange));
+
+            // Set new annotation attributes
+            annotation.Subject = "technical article";
+
+            // Modify annotations in the PDF file (pages 1 to 5)
+            editor.ModifyAnnotations(1, 5, annotation);
+
+            // Delete all the annotations of type Stamp
+            editor.DeleteAnnotation("Stamp");
+
+            // Extract annotations to an ArrayList
+            string[] annotType = {
+                AnnotationType.FreeText.ToString(),
+                AnnotationType.Line.ToString()
+            };
+            ArrayList list = (ArrayList)editor.ExtractAnnotations(1, 5, annotType);
+            for (int index = 0; index < list.Count; index++)
+            {
+                Annotation listAnnotation = (Annotation)list[index];
+                Console.WriteLine(listAnnotation.Contents);
+            }
+
+            // Import annotations from another PDF file
+            string[] importFrom = { inputPath2 };
+            editor.ImportAnnotations(importFrom);
+
+            // Save the output PDF file
+            editor.Save(outputPath);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error in PdfAnnotationEditorFeatures.Run: {ex.Message}");
+        }
+    }
+}

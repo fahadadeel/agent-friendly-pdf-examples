@@ -1,0 +1,94 @@
+using System;
+using System.IO;
+using System.Drawing;
+using Aspose.Pdf;
+using Aspose.Pdf.Facades;
+
+namespace Examples.Core.AsposePdfFacades.Forms;
+
+/// <summary>
+/// Demonstrates how to decorate a particular form field in a PDF using Aspose.Pdf.Facades.
+/// </summary>
+public class DecorateParticularField
+{
+    /// <summary>
+    /// Decorates a form field with a red background and saves the result.
+    /// </summary>
+    public static void Run()
+    {
+        try
+        {
+            // Resolve input and output directories relative to the application base directory.
+            string inputDir = Path.Combine(AppContext.BaseDirectory, "data", "inputs");
+            string outputDir = Path.Combine(AppContext.BaseDirectory, "data", "outputs");
+            Directory.CreateDirectory(outputDir);
+
+            string inputPath = Path.Combine(inputDir, "input.pdf");
+            string outputPath = Path.Combine(outputDir, "DecorateParticularField_out.pdf");
+
+            // Open the document and create a FormEditor object.
+            using var form = new FormEditor();
+            form.BindPdf(inputPath);
+
+            // Set field facade.
+            var fieldFacade = new FormFieldFacade
+            {
+                BackgroundColor = Color.Red,
+                FontSize = 14
+            };
+            form.Facade = fieldFacade;
+
+            // Specify the form field which needs to be decorated.
+            form.DecorateField("textfield");
+
+            // Save updated PDF form.
+            form.Save(outputPath);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error in DecorateParticularField.Run: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// Sets a custom font for a form field, decorates it, and saves the result.
+    /// </summary>
+    public static void SetFont()
+    {
+        try
+        {
+            // Resolve input and output directories relative to the application base directory.
+            string inputDir = Path.Combine(AppContext.BaseDirectory, "data", "inputs");
+            string outputDir = Path.Combine(AppContext.BaseDirectory, "data", "outputs");
+            Directory.CreateDirectory(outputDir);
+
+            string inputPath = Path.Combine(inputDir, "input.pdf");
+            string outputPath = Path.Combine(outputDir, "SetFont_out.pdf");
+
+            // Open the document and create a FormEditor object.
+            using var form = new FormEditor();
+            form.BindPdf(inputPath);
+
+            // Set field facade.
+            var fieldFacade = new FormFieldFacade
+            {
+                BackgroundColor = Color.Red,
+                FontSize = 14,
+                CustomFont = "CourierNew"
+            };
+            form.Facade = fieldFacade;
+
+            // Specify the form field which needs to be decorated.
+            form.DecorateField("textfield");
+
+            // Save updated PDF form.
+            form.Save(outputPath);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error in DecorateParticularField.SetFont: {ex.Message}");
+        }
+    }
+}
+
+// TODO: import or include helper class RunExamples from original source if needed.

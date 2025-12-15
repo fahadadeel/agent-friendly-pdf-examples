@@ -1,0 +1,62 @@
+using System;
+using System.IO;
+using Aspose.Pdf;
+using Aspose.Pdf.Facades;
+using System.Drawing;
+
+namespace Examples.Core.AsposePdfFacades.StampsWatermarks;
+
+public class AddTextStampAll
+{
+    /// <summary>
+    /// Adds a text stamp to all pages of a PDF document.
+    /// </summary>
+    public static void Run()
+    {
+        try
+        {
+            // Resolve base, input, and output directories relative to the application base directory.
+            string baseDir = AppContext.BaseDirectory;
+            string inputDir = Path.Combine(baseDir, "data", "inputs");
+            string outputDir = Path.Combine(baseDir, "data", "outputs");
+            Directory.CreateDirectory(outputDir);
+
+            string inputPath = Path.Combine(inputDir, "AddTextStampAll.pdf");
+            string outputPath = Path.Combine(outputDir, "AddTextStampAll_out.pdf");
+
+            // Create PdfFileStamp object.
+            var fileStamp = new PdfFileStamp();
+
+            // Open the PDF document.
+            fileStamp.BindPdf(inputPath);
+
+            // Create a stamp with formatted text.
+            var stamp = new Stamp();
+            stamp.BindLogo(new FormattedText(
+                "Hello World!",
+                Color.Blue,
+                Color.Gray,
+                FontStyle.Helvetica,
+                EncodingType.Winansi,
+                true,
+                14));
+
+            stamp.SetOrigin(200, 200);
+            stamp.Rotation = 90.0F;
+            stamp.IsBackground = true;
+
+            // Add the stamp to the PDF.
+            fileStamp.AddStamp(stamp);
+
+            // Save the updated PDF.
+            fileStamp.Save(outputPath);
+
+            // Close the stamp processor.
+            fileStamp.Close();
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error in AddTextStampAll.Run: {ex.Message}");
+        }
+    }
+}

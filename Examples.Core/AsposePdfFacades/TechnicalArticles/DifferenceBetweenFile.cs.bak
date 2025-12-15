@@ -1,0 +1,79 @@
+using System;
+using System.IO;
+using System.Drawing;
+using Aspose.Pdf;
+using Aspose.Pdf.Facades;
+
+namespace Examples.Core.AsposePdfFacades.TechnicalArticles;
+
+/// <summary>
+/// Demonstrates how to compare two PDF files, extract form field locations,
+/// and add new text fields based on those locations using Aspose.Pdf.Facades.
+/// </summary>
+public class DifferenceBetweenFile
+{
+    /// <summary>
+    /// Executes the example.
+    /// </summary>
+    public static void Run()
+    {
+        // Resolve input and output directories relative to the application base directory.
+        string inputDir = Path.Combine(AppContext.BaseDirectory, "data", "inputs");
+        string outputDir = Path.Combine(AppContext.BaseDirectory, "data", "outputs");
+        Directory.CreateDirectory(outputDir);
+
+        // Input and output file paths.
+        string filledFormPath = Path.Combine(inputDir, "FilledForm.pdf");
+        string filledForm2Path = Path.Combine(inputDir, "FilledForm - 2.pdf");
+        string outputPath = Path.Combine(outputDir, "DifferenceBetweenFile_out.pdf");
+
+        try
+        {
+            // Load the first PDF containing filled form fields.
+            Form form = new Form(filledFormPath);
+
+            // Retrieve all field names.
+            string[] allFields = form.FieldNames;
+
+            // Prepare an array to hold the location rectangles of each form field.
+            Rectangle[] boxes = new Rectangle[allFields.Length];
+            for (int i = 0; i < allFields.Length; i++)
+            {
+                // Obtain the facade for the current field to access its appearance attributes.
+                FormFieldFacade facade = form.GetFieldFacade(allFields[i]);
+                // The Box property holds the field's location.
+                boxes[i] = facade.Box;
+            }
+
+            // Save the original form PDF to the output location.
+            form.Save(outputPath);
+
+            // Load the second PDF to which new fields will be added.
+            Document document = new Document(filledForm2Path);
+            FormEditor editor = new FormEditor(document);
+
+            // Add a new text field beneath each existing form field.
+            for (int i = 0; i < allFields.Length; i++)
+            {
+                // Parameters: field type, field name, original field name, page number,
+                // left, top, right, bottom.
+                editor.AddField(
+                    FieldType.Text,
+                    "TextField" + i,
+                    allFields[i],
+                    1,
+                    boxes[i].Left,
+                    boxes[i].Top,
+                    boxes[i].Left + 50,
+                    boxes[i].Top + 10);
+            }
+
+            // Save the modified document, overwriting the previous output file.
+            editor.Save(outputPath);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"An error occurred while processing PDFs: {ex.Message}");
+        }
+    }
+}

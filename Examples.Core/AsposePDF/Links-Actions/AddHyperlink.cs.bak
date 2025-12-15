@@ -1,0 +1,72 @@
+using System;
+using System.IO;
+using System.Drawing;
+using Aspose.Pdf;
+using Aspose.Pdf.Annotations;
+using Aspose.Pdf.Text;
+
+namespace Examples.Core.AsposePDF.Links_Actions;
+
+/// <summary>
+/// Demonstrates adding a hyperlink and a free‑text annotation to a PDF document using Aspose.Pdf.
+/// </summary>
+public class AddHyperlink
+{
+    /// <summary>
+    /// Executes the example.
+    /// </summary>
+    public static void Run()
+    {
+        try
+        {
+            // Resolve input and output directories relative to the application base directory.
+            string baseDir = AppContext.BaseDirectory;
+            string inputDir = Path.Combine(baseDir, "data", "inputs");
+            string outputDir = Path.Combine(baseDir, "data", "outputs");
+            Directory.CreateDirectory(outputDir);
+
+            string inputPath = Path.Combine(inputDir, "AddHyperlink.pdf");
+            string outputPath = Path.Combine(outputDir, "AddHyperlink_out.pdf");
+
+            // Open the PDF document.
+            Document document = new Document(inputPath);
+
+            // Access the first page.
+            Page page = document.Pages[1];
+
+            // Create a link annotation covering a rectangle area.
+            LinkAnnotation link = new LinkAnnotation(page, new Aspose.Pdf.Rectangle(100, 100, 300, 300));
+
+            // Configure the border (width = 0 makes it invisible).
+            Border border = new Border(link) { Width = 0 };
+            link.Border = border;
+
+            // Set the action to navigate to a remote URI.
+            link.Action = new GoToURIAction("www.aspose.com");
+
+            // Add the link annotation to the page.
+            page.Annotations.Add(link);
+
+            // Create a free‑text annotation with a default appearance.
+            Font font = FontRepository.FindFont("TimesNewRoman");
+            DefaultAppearance appearance = new DefaultAppearance(font, 10, Color.Blue);
+            FreeTextAnnotation textAnnotation = new FreeTextAnnotation(page, new Aspose.Pdf.Rectangle(100, 100, 300, 300), appearance)
+            {
+                Contents = "Link to Aspose website",
+                Border = border
+            };
+
+            // Add the free‑text annotation to the page.
+            page.Annotations.Add(textAnnotation);
+
+            // Save the updated document.
+            document.Save(outputPath);
+
+            Console.WriteLine($"\nHyperlink added successfully.\nFile saved at {outputPath}");
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error during AddHyperlink example: {ex.Message}");
+        }
+    }
+}

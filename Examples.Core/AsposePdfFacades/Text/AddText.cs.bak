@@ -1,0 +1,62 @@
+using System;
+using System.IO;
+using Aspose.Pdf;
+using Aspose.Pdf.Facades;
+using System.Drawing; // TODO: System.Drawing may be platform‑specific; ensure appropriate package/reference
+
+namespace Examples.Core.AsposePdfFacades.Text;
+
+/// <summary>
+/// Demonstrates adding formatted text to a PDF using Aspose.Pdf.Facades.
+/// </summary>
+public class AddText
+{
+    /// <summary>
+    /// Runs the AddText example.
+    /// </summary>
+    public static void Run()
+    {
+        try
+        {
+            // Resolve input and output paths
+            string inputPath = Path.Combine(AppContext.BaseDirectory, "data", "inputs", "AddText.pdf");
+            string outputDir = Path.Combine(AppContext.BaseDirectory, "data", "outputs");
+            Directory.CreateDirectory(outputDir);
+            string outputPath = Path.Combine(outputDir, "AddText_out.pdf");
+
+            // Open document
+            using var mender = new PdfFileMend();
+
+            // Bind the PDF file
+            mender.BindPdf(inputPath);
+
+            // Create formatted text
+            var text = new FormattedText(
+                "Aspose - Your File Format Experts!",
+                Color.AliceBlue,
+                Color.Gray,
+                FontStyle.Courier,
+                EncodingType.Winansi,
+                true,
+                14);
+
+            // Set word wrap options
+            mender.IsWordWrap = true;
+            mender.WrapMode = WordWrapMode.Default;
+
+            // Add text to the first page (page number 1)
+            // Parameters: text, pageNumber, x, y, width, height
+            mender.AddText(text, 1, 100, 200, 200, 400);
+
+            // Save the modified PDF
+            mender.Save(outputPath);
+
+            // Close the mender (Dispose will also close)
+            mender.Close();
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error in AddText example: {ex.Message}");
+        }
+    }
+}

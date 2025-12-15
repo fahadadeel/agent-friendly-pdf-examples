@@ -1,0 +1,55 @@
+using System;
+using System.IO;
+using Aspose.Pdf;
+using Aspose.Pdf.Facades;
+using System.Drawing;
+
+namespace Examples.Core.AsposePdfFacades.Annotations;
+
+/// <summary>
+/// Demonstrates adding a free text annotation to a PDF using Aspose.Pdf.Facades.
+/// </summary>
+public class AddFreeTextAnnotation
+{
+    /// <summary>
+    /// Runs the example.
+    /// </summary>
+    public static void Run()
+    {
+        // ExStart:AddFreeTextAnnotation
+        try
+        {
+            // Resolve input and output directories relative to the application base directory.
+            string baseDir = AppContext.BaseDirectory;
+            string inputDir = Path.Combine(baseDir, "data", "inputs");
+            string outputDir = Path.Combine(baseDir, "data", "outputs");
+
+            // Ensure the output directory exists.
+            Directory.CreateDirectory(outputDir);
+
+            // Input and output file paths.
+            string inputPath = Path.Combine(inputDir, "AddFreeTextAnnotation.pdf");
+            string outputPath = Path.Combine(outputDir, "AddFreeTextAnnotation_out.pdf");
+
+            // Open document.
+            PdfContentEditor contentEditor = new PdfContentEditor();
+            contentEditor.BindPdf(inputPath);
+
+            // Create rectangle for the annotation.
+            Rectangle rect = new Rectangle(50, 50, 100, 100);
+
+            // Create free text annotation.
+            contentEditor.CreateFreeText(rect, "Sample content", 1);
+
+            // Save updated PDF file.
+            contentEditor.Save(outputPath);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error in AddFreeTextAnnotation.Run: {ex.Message}");
+        }
+        // ExEnd:AddFreeTextAnnotation
+    }
+}
+
+// TODO: import or include helper class RunExamples from original source if needed.

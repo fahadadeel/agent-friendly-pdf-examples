@@ -1,0 +1,63 @@
+using System;
+using System.IO;
+using Aspose.Pdf;
+using Aspose.Pdf.Facades;
+using System.Drawing;
+
+namespace Examples.Core.AsposePdfFacades.StampsWatermarks;
+
+/// <summary>
+/// Demonstrates adding a footer to a PDF using Aspose.Pdf.Facades.
+/// </summary>
+public class AddFooter
+{
+    /// <summary>
+    /// Executes the AddFooter example.
+    /// </summary>
+    public static void Run()
+    {
+        PdfFileStamp? fileStamp = null;
+        try
+        {
+            // Resolve input and output paths relative to the application base directory.
+            string baseDir = AppContext.BaseDirectory;
+            string inputPath = Path.Combine(baseDir, "data", "inputs", "AddFooter.pdf");
+            string outputDir = Path.Combine(baseDir, "data", "outputs");
+            string outputPath = Path.Combine(outputDir, "AddFooter_out.pdf");
+
+            // Ensure the output directory exists.
+            Directory.CreateDirectory(outputDir);
+
+            // Create PdfFileStamp object.
+            fileStamp = new PdfFileStamp();
+
+            // Open the PDF document.
+            fileStamp.BindPdf(inputPath);
+
+            // Create formatted text for the footer.
+            var formattedText = new FormattedText(
+                "Aspose - Your File Format Experts!",
+                Color.Blue,
+                Color.Gray,
+                FontStyle.Courier,
+                EncodingType.Winansi,
+                false,
+                14);
+
+            // Add footer at a distance of 10 units from the bottom.
+            fileStamp.AddFooter(formattedText, 10);
+
+            // Save the updated PDF file.
+            fileStamp.Save(outputPath);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error in AddFooter example: {ex.Message}");
+        }
+        finally
+        {
+            // Close the PdfFileStamp if it was created.
+            fileStamp?.Close();
+        }
+    }
+}

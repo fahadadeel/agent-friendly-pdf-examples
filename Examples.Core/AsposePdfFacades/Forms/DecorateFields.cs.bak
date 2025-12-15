@@ -1,0 +1,58 @@
+using System;
+using System.IO;
+using Aspose.Pdf;
+using Aspose.Pdf.Facades;
+using System.Drawing;
+
+namespace Examples.Core.AsposePdfFacades.Forms;
+
+/// <summary>
+/// Demonstrates how to decorate form fields in a PDF using Aspose.Pdf.Facades.
+/// </summary>
+public class DecorateFields
+{
+    /// <summary>
+    /// Executes the example.
+    /// </summary>
+    public static void Run()
+    {
+        // Resolve input and output directories relative to the application base directory.
+        string baseDir = AppContext.BaseDirectory;
+        string inputDir = Path.Combine(baseDir, "data", "inputs");
+        string outputDir = Path.Combine(baseDir, "data", "outputs");
+
+        // Ensure the output directory exists.
+        Directory.CreateDirectory(outputDir);
+
+        string inputPath = Path.Combine(inputDir, "DecorateFields.pdf");
+        string outputPath = Path.Combine(outputDir, "DecorateFields_out.pdf");
+
+        try
+        {
+            // Open document using FormEditor.
+            var form = new FormEditor();
+            form.BindPdf(inputPath);
+
+            // Create a new facade object and assign it to the form editor.
+            var facade = new FormFieldFacade();
+            form.Facade = facade;
+
+            // Set the background color as red.
+            // TODO: verify System.Drawing.Color usage on all target platforms.
+            facade.BackgroundColor = Color.Red;
+
+            // Set the alignment as center.
+            facade.Alignment = FormFieldFacade.AlignCenter;
+
+            // Decorate all text fields.
+            form.DecorateField(FieldType.Text);
+
+            // Save the modified PDF.
+            form.Save(outputPath);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error during DecorateFields example: {ex.Message}");
+        }
+    }
+}

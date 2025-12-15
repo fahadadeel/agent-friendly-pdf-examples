@@ -1,0 +1,50 @@
+using System;
+using System.IO;
+using System.Drawing;
+using Aspose.Pdf;
+using Aspose.Pdf.Facades;
+
+namespace Examples.Core.AsposePdfFacades.Bookmarks;
+
+/// <summary>
+/// Demonstrates creating bookmarks for all pages of a PDF document using Aspose.Pdf.Facades.
+/// </summary>
+public class CreateBookmarksPagesProperties
+{
+    /// <summary>
+    /// Executes the example.
+    /// </summary>
+    public static void Run()
+    {
+        try
+        {
+            // Resolve input and output directories relative to the application base directory.
+            string baseDir = AppContext.BaseDirectory;
+            string inputDir = Path.Combine(baseDir, "data", "inputs");
+            string outputDir = Path.Combine(baseDir, "data", "outputs");
+
+            // Ensure the output directory exists.
+            Directory.CreateDirectory(outputDir);
+
+            // Define input and output file paths.
+            string inputPath = Path.Combine(inputDir, "CreateBookmarks-PagesProperties.pdf");
+            string outputPath = Path.Combine(outputDir, "CreateBookmarks-PagesProperties_out.pdf");
+
+            // Open the PDF document for bookmark editing.
+            var bookmarkEditor = new PdfBookmarkEditor();
+            bookmarkEditor.BindPdf(inputPath);
+
+            // Create bookmarks for all pages with a green color.
+            bookmarkEditor.CreateBookmarks(Color.Green, true, true);
+
+            // Save the updated PDF file.
+            bookmarkEditor.Save(outputPath);
+
+            Console.WriteLine($"Bookmarks created and saved to: {outputPath}");
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error during bookmark creation: {ex.Message}");
+        }
+    }
+}

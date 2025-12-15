@@ -1,0 +1,74 @@
+using System;
+using System.IO;
+using Aspose.Pdf;
+using Aspose.Pdf.Tagged;
+using Aspose.Pdf.Tagged.LogicalStructure;
+
+namespace Examples.Core.AsposePDF.Working_with_TaggedPDFs;
+
+/// <summary>
+/// Demonstrates setting language and title in a tagged PDF document.
+/// </summary>
+public class SetupLanguageAndTitle
+{
+    /// <summary>
+    /// Creates a tagged PDF with multiple language paragraphs and saves it.
+    /// </summary>
+    public static void Run()
+    {
+        try
+        {
+            // Resolve output directory (data/outputs relative to the application base)
+            string outputDir = Path.Combine(AppContext.BaseDirectory, "data", "outputs");
+            Directory.CreateDirectory(outputDir);
+
+            // Create a new PDF document
+            Document document = new Document();
+
+            // Get TaggedContent
+            ITaggedContent taggedContent = document.TaggedContent;
+
+            // Set Title and Language
+            taggedContent.SetTitle("Example Tagged Document");
+            taggedContent.SetLanguage("en-US");
+
+            // Header (en-US, inherited from document)
+            HeaderElement h1 = taggedContent.CreateHeaderElement(1);
+            h1.SetText("Phrase on different languages");
+            taggedContent.RootElement.AppendChild(h1);
+
+            // Paragraph (English)
+            ParagraphElement pEN = taggedContent.CreateParagraphElement();
+            pEN.SetText("Hello, World!");
+            pEN.Language = "en-US";
+            taggedContent.RootElement.AppendChild(pEN);
+
+            // Paragraph (German)
+            ParagraphElement pDE = taggedContent.CreateParagraphElement();
+            pDE.SetText("Hallo Welt!");
+            pDE.Language = "de-DE";
+            taggedContent.RootElement.AppendChild(pDE);
+
+            // Paragraph (French)
+            ParagraphElement pFR = taggedContent.CreateParagraphElement();
+            pFR.SetText("Bonjour le monde!");
+            pFR.Language = "fr-FR";
+            taggedContent.RootElement.AppendChild(pFR);
+
+            // Paragraph (Spanish)
+            ParagraphElement pSP = taggedContent.CreateParagraphElement();
+            pSP.SetText("¡Hola Mundo!");
+            pSP.Language = "es-ES";
+            taggedContent.RootElement.AppendChild(pSP);
+
+            // Save Tagged PDF Document
+            string outputPath = Path.Combine(outputDir, "SetupLanguageAndTitle.pdf");
+            document.Save(outputPath);
+            Console.WriteLine($"Document saved to: {outputPath}");
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error in SetupLanguageAndTitle.Run: {ex.Message}");
+        }
+    }
+}

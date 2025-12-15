@@ -1,0 +1,96 @@
+using System;
+using System.IO;
+using Aspose.Pdf;
+using Aspose.Pdf.Facades;
+using System.Drawing;
+
+namespace Examples.Core.AsposePdfFacades.Stamps_Watermarks;
+
+/// <summary>
+/// Demonstrates adding page numbers and custom numbering styles to PDF documents using Aspose.Pdf.Facades.
+/// </summary>
+public class AddPageNumber
+{
+    /// <summary>
+    /// Adds a formatted page number stamp to each page of the input PDF and saves the result.
+    /// </summary>
+    public static void Run()
+    {
+        try
+        {
+            // Resolve input and output file paths.
+            string inputPath = Path.Combine(AppContext.BaseDirectory, "data", "inputs", "AddPageNumber.pdf");
+            string outputPath = Path.Combine(AppContext.BaseDirectory, "data", "outputs", "AddPageNumber_out.pdf");
+
+            // Ensure the output directory exists.
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath)!);
+
+            // Create PdfFileStamp object.
+            using var fileStamp = new PdfFileStamp();
+
+            // Open the document.
+            fileStamp.BindPdf(inputPath);
+
+            // Get total number of pages.
+            int totalPages = new PdfFileInfo(inputPath).NumberOfPages;
+
+            // Create formatted text for page number.
+            var formattedText = new FormattedText(
+                $"Page # Of {totalPages}",
+                Color.Blue,
+                Color.Gray,
+                FontStyle.Courier,
+                EncodingType.Winansi,
+                false,
+                14);
+
+            // Set starting number for first page.
+            fileStamp.StartingNumber = 1;
+
+            // Add page number stamp.
+            fileStamp.AddPageNumber(formattedText, 0);
+
+            // Save the updated PDF file.
+            fileStamp.Save(outputPath);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error in AddPageNumber.Run: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// Applies a custom Roman numeral page numbering style and saves the result.
+    /// </summary>
+    public static void CustomNumberStyle()
+    {
+        try
+        {
+            // Resolve input and output file paths.
+            string inputPath = Path.Combine(AppContext.BaseDirectory, "data", "inputs", "AddPageNumber.pdf");
+            string outputPath = Path.Combine(AppContext.BaseDirectory, "data", "outputs", "CustomNumberStyle_out.pdf");
+
+            // Ensure the output directory exists.
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath)!);
+
+            // Create PdfFileStamp object.
+            using var fileStamp = new PdfFileStamp();
+
+            // Open the document.
+            fileStamp.BindPdf(inputPath);
+
+            // Specify numbering style as Numerals Roman UpperCase.
+            fileStamp.NumberingStyle = NumberingStyle.NumeralsRomanUppercase;
+
+            // Add page number stamp at Bottom-Center of page using default placeholder "#".
+            fileStamp.AddPageNumber("#");
+
+            // Save the updated PDF file.
+            fileStamp.Save(outputPath);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error in AddPageNumber.CustomNumberStyle: {ex.Message}");
+        }
+    }
+}

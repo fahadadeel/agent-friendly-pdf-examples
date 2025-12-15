@@ -1,0 +1,243 @@
+using System;
+using System.IO;
+using System.Drawing;
+using Aspose.Pdf;
+using Aspose.Pdf.Facades;
+
+namespace Examples.Core.AsposePdfFacades.TechnicalArticles;
+
+public class ConcatenatePdfFilesAndCreateTOC
+{
+    /// <summary>
+    /// Executes the example that concatenates two PDF files and creates a table of contents.
+    /// </summary>
+    public static void Run()
+    {
+        // ExStart:ConcatenatePdfFilesAndCreateTOC
+        try
+        {
+            string inputDir = GetInputDirectory();
+            string outputDir = GetOutputDirectory();
+
+            // Create PdfFileEditor object
+            var pdfEditor = new PdfFileEditor();
+
+            // Concatenate input PDFs and write result to output file
+            string inputPath1 = Path.Combine(inputDir, "input1.pdf");
+            string inputPath2 = Path.Combine(inputDir, "input2.pdf");
+            string outputPath = Path.Combine(outputDir, "ConcatenatePdfFilesAndCreateTOC_out.pdf");
+
+            using var stream1 = new FileStream(inputPath1, FileMode.Open, FileAccess.Read);
+            using var stream2 = new FileStream(inputPath2, FileMode.Open, FileAccess.Read);
+            using var outStream = new FileStream(outputPath, FileMode.Create, FileAccess.Write);
+            pdfEditor.Concatenate(stream1, stream2, outStream);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Run failed: {ex.Message}");
+        }
+        // ExEnd:ConcatenatePdfFilesAndCreateTOC
+    }
+
+    public static void InsertBlankPage()
+    {
+        // ExStart:InsertBlankPage
+        try
+        {
+            string inputDir = GetInputDirectory();
+
+            string concatenatedPath = Path.Combine(inputDir, "Concatenated_Table_Of_Contents.pdf");
+            using var pdfDoc = new Document(new FileStream(concatenatedPath, FileMode.Open, FileAccess.Read));
+            // Insert a empty page in a PDF at position 1 (beginning)
+            pdfDoc.Pages.Insert(1);
+            // Save changes back to the same file (or you could choose another location)
+            pdfDoc.Save(concatenatedPath);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"InsertBlankPage failed: {ex.Message}");
+        }
+        // ExEnd:InsertBlankPage
+    }
+
+    public static void AddTextStamps()
+    {
+        // ExStart:AddTextStamps
+        try
+        {
+            string inputDir = GetInputDirectory();
+
+            // Set Text Stamp to display string Table Of Contents
+            var stamp = new Stamp();
+            stamp.BindLogo(new FormattedText(
+                "Table Of Contents",
+                Color.Maroon,
+                Color.Transparent,
+                FontStyle.Helvetica,
+                EncodingType.Winansi,
+                true,
+                18));
+
+            // Determine origin based on width of first input PDF page
+            using var pdfInfoStream = new FileStream(Path.Combine(inputDir, "input1.pdf"), FileMode.Open, FileAccess.Read);
+            var pdfInfo = new PdfFileInfo(pdfInfoStream);
+            double pageWidth = pdfInfo.GetPageWidth(1);
+            stamp.SetOrigin(pageWidth / 3, 700);
+
+            // Apply stamp to the first page
+            stamp.Pages = new[] { 1 };
+            // Note: The stamp is prepared here; actual addition to a PDF occurs later in CompletedCode.
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"AddTextStamps failed: {ex.Message}");
+        }
+        // ExEnd:AddTextStamps
+    }
+
+    public static void CreateLocalLinks()
+    {
+        // ExStart:CreateLocalLinks
+        try
+        {
+            string inputDir = GetInputDirectory();
+
+            // Bind the PDF file in which we added the blank page
+            var contentEditor = new PdfContentEditor();
+            string pdfPath = Path.Combine(inputDir, "Concatenated_Table_Of_Contents.pdf");
+            using var pdfStream = new FileStream(pdfPath, FileMode.Open, FileAccess.Read);
+            contentEditor.BindPdf(pdfStream);
+
+            // Create link for first document (rectangle area, target page, zoom, color)
+            contentEditor.CreateLocalLink(new Rectangle(150, 650, 100, 20), 2, 1, Color.Transparent);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"CreateLocalLinks failed: {ex.Message}");
+        }
+        // ExEnd:CreateLocalLinks
+    }
+
+    public static void CompletedCode()
+    {
+        // ExStart:CompletedCode
+        try
+        {
+            string inputDir = GetInputDirectory();
+            string outputDir = GetOutputDirectory();
+
+            var pdfEditor = new PdfFileEditor();
+
+            // Concatenate the two PDFs into a memory stream
+            using var concatenatedStream = new MemoryStream();
+            using var stream1 = new FileStream(Path.Combine(inputDir, "input1.pdf"), FileMode.Open, FileAccess.Read);
+            using var stream2 = new FileStream(Path.Combine(inputDir, "input2.pdf"), FileMode.Open, FileAccess.Read);
+            pdfEditor.Concatenate(stream1, stream2, concatenatedStream);
+
+            // Insert a blank page at the beginning
+            concatenatedStream.Position = 0;
+            var concatenatedDoc = new Document(concatenatedStream);
+            concatenatedDoc.Pages.Insert(1);
+
+            // Save the document with blank page to another memory stream
+            using var docWithBlankPage = new MemoryStream();
+            concatenatedDoc.Save(docWithBlankPage);
+
+            // Add Table of Contents stamp and item stamps
+            using var docWithTocHeading = new MemoryStream();
+            var fileStamp = new PdfFileStamp();
+            fileStamp.BindPdf(docWithBlankPage);
+
+            // TOC heading stamp
+            var tocStamp = new Stamp();
+            tocStamp.BindLogo(new FormattedText(
+                "Table Of Contents",
+                Color.Maroon,
+                Color.Transparent,
+                FontStyle.Helvetica,
+                EncodingType.Winansi,
+                true,
+                18));
+            tocStamp.SetOrigin(new PdfFileInfo(docWithBlankPage).GetPageWidth(1) / 3, 700);
+            tocStamp.Pages = new[] { 1 };
+            fileStamp.AddStamp(tocStamp);
+
+            // Document 1 link stamp
+            var doc1Stamp = new Stamp();
+            doc1Stamp.BindLogo(new FormattedText(
+                "1 - Link to Document 1",
+                Color.Black,
+                Color.Transparent,
+                FontStyle.Helvetica,
+                EncodingType.Winansi,
+                true,
+                12));
+            doc1Stamp.SetOrigin(150, 650);
+            doc1Stamp.Pages = new[] { 1 };
+            fileStamp.AddStamp(doc1Stamp);
+
+            // Document 2 link stamp
+            var doc2Stamp = new Stamp();
+            doc2Stamp.BindLogo(new FormattedText(
+                "2 - Link to Document 2",
+                Color.Black,
+                Color.Transparent,
+                FontStyle.Helvetica,
+                EncodingType.Winansi,
+                true,
+                12));
+            doc2Stamp.SetOrigin(150, 620);
+            doc2Stamp.Pages = new[] { 1 };
+            fileStamp.AddStamp(doc2Stamp);
+
+            // Save stamped PDF to memory stream
+            fileStamp.Save(docWithTocHeading);
+            fileStamp.Close();
+
+            // Add local links for the TOC entries
+            var contentEditor = new PdfContentEditor();
+            contentEditor.BindPdf(docWithTocHeading);
+            // Link for first document (page 2 in the final PDF)
+            contentEditor.CreateLocalLink(new Rectangle(150, 650, 100, 20), 2, 1, Color.Transparent);
+
+            // Link for second document
+            // Number of pages in first input PDF + 2 (blank page + TOC page)
+            var firstPdfInfo = new PdfFileInfo(Path.Combine(inputDir, "Input1.pdf"));
+            int targetPage = firstPdfInfo.NumberOfPages + 2;
+            contentEditor.CreateLocalLink(new Rectangle(150, 620, 100, 20), targetPage, 1, Color.Transparent);
+
+            // Save the final PDF to the output directory
+            string finalOutputPath = Path.Combine(outputDir, "Concatenated_Table_Of_Contents.pdf");
+            contentEditor.Save(finalOutputPath);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"CompletedCode failed: {ex.Message}");
+        }
+        // ExEnd:CompletedCode
+    }
+
+    private static string GetInputDirectory()
+    {
+        string baseDir = AppContext.BaseDirectory;
+        string inputDir = Path.Combine(baseDir, "data", "inputs");
+        if (!Directory.Exists(inputDir))
+        {
+            Directory.CreateDirectory(inputDir);
+        }
+        return inputDir;
+    }
+
+    private static string GetOutputDirectory()
+    {
+        string baseDir = AppContext.BaseDirectory;
+        string outputDir = Path.Combine(baseDir, "data", "outputs");
+        if (!Directory.Exists(outputDir))
+        {
+            Directory.CreateDirectory(outputDir);
+        }
+        return outputDir;
+    }
+}
+
+// TODO: import or include helper class RunExamples from original source if needed.

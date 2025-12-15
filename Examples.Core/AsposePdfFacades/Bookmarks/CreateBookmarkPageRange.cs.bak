@@ -1,0 +1,52 @@
+using System;
+using System.IO;
+using Aspose.Pdf;
+using Aspose.Pdf.Facades;
+
+namespace Examples.Core.AsposePdfFacades.Bookmarks;
+
+/// <summary>
+/// Demonstrates creating a bookmark for a specific page range using Aspose.Pdf.Facades.
+/// </summary>
+public class CreateBookmarkPageRange
+{
+    /// <summary>
+    /// Executes the example.
+    /// </summary>
+    public static void Run()
+    {
+        try
+        {
+            // Resolve input and output directories relative to the application base directory.
+            string baseDir = AppContext.BaseDirectory;
+            string inputDir = Path.Combine(baseDir, "data", "inputs");
+            string outputDir = Path.Combine(baseDir, "data", "outputs");
+
+            // Ensure the output directory exists.
+            Directory.CreateDirectory(outputDir);
+
+            // Input and output file paths.
+            string inputPath = Path.Combine(inputDir, "CreateBookmark-Page.pdf");
+            string outputPath = Path.Combine(outputDir, "CreateBookmarkPageRange_out.pdf");
+
+            // Open document.
+            var bookmarkEditor = new PdfBookmarkEditor();
+            bookmarkEditor.BindPdf(inputPath);
+
+            // Bookmark name list.
+            string[] bookmarkList = { "First" };
+            // Page list.
+            int[] pageList = { 1 };
+
+            // Create bookmark of a range of pages.
+            bookmarkEditor.CreateBookmarkOfPage(bookmarkList, pageList);
+
+            // Save updated PDF file.
+            bookmarkEditor.Save(outputPath);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error executing CreateBookmarkPageRange: {ex.Message}");
+        }
+    }
+}

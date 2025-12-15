@@ -1,0 +1,223 @@
+using System;
+using System.IO;
+using Aspose.Pdf.Facades;
+using Aspose.Pdf.Devices;
+using Aspose.Pdf.Annotations;
+using System.Drawing;
+
+namespace Examples.Core.AsposePdfFacades.TechnicalArticles;
+
+public class PDFToTIFFConversion
+{
+    /// <summary>
+    /// Converts a PDF document to a TIFF image using the default conversion approach.
+    /// </summary>
+    public static void Run()
+    {
+        // ExStart:PDFToTIFFConversion
+        try
+        {
+            // Resolve input and output paths relative to the application base directory.
+            string inputPath = Path.Combine(AppContext.BaseDirectory, "data", "inputs", "inFile.pdf");
+            string outputPath = Path.Combine(AppContext.BaseDirectory, "data", "outputs", "PDFToTIFFConversion_out.tif");
+
+            // Ensure the output directory exists.
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath)!);
+
+            // Create PdfConverter object and bind input PDF file.
+            PdfConverter pdfConverter = new PdfConverter
+            {
+                Resolution = new Resolution(300)
+            };
+            pdfConverter.BindPdf(inputPath);
+            pdfConverter.DoConvert();
+
+            // Create TiffSettings object and set ColorDepth.
+            TiffSettings tiffSettings = new TiffSettings
+            {
+                Depth = ColorDepth.Format1bpp
+            };
+
+            // Convert to TIFF image.
+            pdfConverter.SaveAsTIFF(outputPath, 300, 300, tiffSettings);
+            pdfConverter.Close();
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error during PDF to TIFF conversion: {ex.Message}");
+        }
+        // ExEnd:PDFToTIFFConversion
+    }
+
+    /// <summary>
+    /// Converts a PDF document to a TIFF image using a custom bitmap converter.
+    /// </summary>
+    public static void NewApproach()
+    {
+        // ExStart:NewApproach
+        try
+        {
+            string inputPath = Path.Combine(AppContext.BaseDirectory, "data", "inputs", "inFile.pdf");
+            string outputPath = Path.Combine(AppContext.BaseDirectory, "data", "outputs", "PDFToTIFFConversion_out.tif");
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath)!);
+
+            // Create PdfConverter object and bind input PDF file.
+            PdfConverter pdfConverter = new PdfConverter();
+            pdfConverter.BindPdf(inputPath);
+            pdfConverter.DoConvert();
+
+            // Create TiffSettings object (compression can be set here if needed).
+            TiffSettings tiffSettings = new TiffSettings();
+
+            // Convert to TIFF image using a custom bitmap converter.
+            pdfConverter.SaveAsTIFF(outputPath, 300, 300, tiffSettings, new WinAPIIndexBitmapConverter());
+            pdfConverter.Close();
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error during PDF to TIFF conversion (new approach): {ex.Message}");
+        }
+        // ExEnd:NewApproach
+    }
+}
+
+// ExStart:IIndexBitmapConverter
+public class WinAPIIndexBitmapConverter : IIndexBitmapConverter
+{
+    public Bitmap Get1BppImage(Bitmap src)
+    {
+        return CopyToBpp(src, 1);
+    }
+
+    public Bitmap Get4BppImage(Bitmap src)
+    {
+        return CopyToBpp(src, 4);
+    }
+
+    public Bitmap Get8BppImage(Bitmap src)
+    {
+        return CopyToBpp(src, 8);
+    }
+
+    [System.Runtime.InteropServices.DllImport("gdi32.dll")]
+    public static extern bool DeleteObject(IntPtr hObject);
+
+    [System.Runtime.InteropServices.DllImport("user32.dll")]
+    public static extern IntPtr GetDC(IntPtr hwnd);
+
+    [System.Runtime.InteropServices.DllImport("gdi32.dll")]
+    public static extern IntPtr CreateCompatibleDC(IntPtr hdc);
+
+    [System.Runtime.InteropServices.DllImport("user32.dll")]
+    public static extern int ReleaseDC(IntPtr hwnd, IntPtr hdc);
+
+    [System.Runtime.InteropServices.DllImport("gdi32.dll")]
+    public static extern int DeleteDC(IntPtr hdc);
+
+    [System.Runtime.InteropServices.DllImport("gdi32.dll")]
+    public static extern IntPtr SelectObject(IntPtr hdc, IntPtr hgdiobj);
+
+    [System.Runtime.InteropServices.DllImport("gdi32.dll")]
+    public static extern int BitBlt(IntPtr hdcDst, int xDst, int yDst, int w, int h, IntPtr hdcSrc, int xSrc, int ySrc, int rop);
+    static int SRCCOPY = 0x00CC0020;
+
+    [System.Runtime.InteropServices.DllImport("gdi32.dll")]
+    static extern IntPtr CreateDIBSection(IntPtr hdc, ref BITMAPINFO bmi, uint Usage, out IntPtr bits, IntPtr hSection, uint dwOffset);
+    static uint BI_RGB = 0;
+    static uint DIB_RGB_COLORS = 0;
+
+    [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
+    public struct BITMAPINFO
+    {
+        public uint biSize;
+        public int biWidth, biHeight;
+        public short biPlanes, biBitCount;
+        public uint biCompression, biSizeImage;
+        public int biXPelsPerMeter, biYPelsPerMeter;
+        public uint biClrUsed, biClrImportant;
+        [System.Runtime.InteropServices.MarshalAs(System.Runtime.InteropServices.UnmanagedType.ByValArray, SizeConst = 256)]
+        public uint[] cols;
+    }
+
+    static uint MAKERGB(int r, int g, int b)
+    {
+        return ((uint)(b & 255)) | ((uint)((r & 255) << 8)) | ((uint)((g & 255) << 16));
+    }
+
+    /// <summary>
+    /// Copies a bitmap into a 1bpp/4bpp/8bpp bitmap of the same dimensions, fast.
+    /// </summary>
+    /// <param name="b">original bitmap</param>
+    /// <param name="bpp">1, 4 or 8, target bits per pixel</param>
+    /// <returns>a copy of the bitmap with the requested bpp</returns>
+    private Bitmap CopyToBpp(Bitmap b, int bpp)
+    {
+        if (bpp != 1 && bpp != 8 && bpp != 4) throw new ArgumentException("1, 4 or 8", nameof(bpp));
+
+        int w = b.Width, h = b.Height;
+        IntPtr hbm = b.GetHbitmap(); // Step (1)
+
+        // Step (2): create the indexed bitmap.
+        BITMAPINFO bmi = new BITMAPINFO
+        {
+            biSize = 40,
+            biWidth = w,
+            biHeight = h,
+            biPlanes = 1,
+            biBitCount = (short)bpp,
+            biCompression = BI_RGB,
+            biSizeImage = (uint)(((w + 7) & 0xFFFFFFF8) * h / 8),
+            biXPelsPerMeter = 1000000,
+            biYPelsPerMeter = 1000000,
+            biClrUsed = (uint)1 << bpp,
+            biClrImportant = (uint)1 << bpp,
+            cols = new uint[256]
+        };
+
+        if (bpp == 1)
+        {
+            bmi.cols[0] = MAKERGB(0, 0, 0);
+            bmi.cols[1] = MAKERGB(255, 255, 255);
+        }
+        else if (bpp == 4)
+        {
+            bmi.biClrUsed = 16;
+            bmi.biClrImportant = 16;
+            int[] colv = new int[16] { 8, 24, 38, 56, 72, 88, 104, 120, 136, 152, 168, 184, 210, 216, 232, 248 };
+            for (int i = 0; i < 16; i++) bmi.cols[i] = MAKERGB(colv[i], colv[i], colv[i]);
+        }
+        else if (bpp == 8)
+        {
+            bmi.biClrUsed = 216;
+            bmi.biClrImportant = 216;
+            int[] colv = new int[6] { 0, 51, 102, 153, 204, 255 };
+            for (int i = 0; i < 216; i++) bmi.cols[i] = MAKERGB(colv[i / 36], colv[(i / 6) % 6], colv[i % 6]);
+        }
+
+        // Create the indexed bitmap "hbm0".
+        IntPtr bits0;
+        IntPtr hbm0 = CreateDIBSection(IntPtr.Zero, ref bmi, DIB_RGB_COLORS, out bits0, IntPtr.Zero, 0);
+
+        // Step (3): BitBlt from original to indexed bitmap.
+        IntPtr sdc = GetDC(IntPtr.Zero);
+        IntPtr hdc = CreateCompatibleDC(sdc);
+        SelectObject(hdc, hbm);
+        IntPtr hdc0 = CreateCompatibleDC(sdc);
+        SelectObject(hdc0, hbm0);
+        BitBlt(hdc0, 0, 0, w, h, hdc, 0, 0, SRCCOPY);
+
+        // Step (4): Convert the indexed hbitmap back into a Bitmap.
+        Bitmap b0 = Image.FromHbitmap(hbm0);
+
+        // Cleanup.
+        DeleteDC(hdc);
+        DeleteDC(hdc0);
+        ReleaseDC(IntPtr.Zero, sdc);
+        DeleteObject(hbm);
+        DeleteObject(hbm0);
+
+        return b0;
+    }
+}
+// ExEnd:IIndexBitmapConverter

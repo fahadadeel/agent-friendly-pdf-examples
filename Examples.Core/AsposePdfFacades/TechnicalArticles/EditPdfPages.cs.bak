@@ -1,0 +1,70 @@
+using System;
+using System.IO;
+using Aspose.Pdf.Facades;
+
+namespace Examples.Core.AsposePdfFacades.TechnicalArticles;
+
+/// <summary>
+/// Demonstrates editing PDF pages using Aspose.Pdf.Facades.PdfPageEditor.
+/// </summary>
+public class EditPdfPages
+{
+    /// <summary>
+    /// Runs the example.
+    /// </summary>
+    public static void Run()
+    {
+        // Resolve input and output directories relative to the application base directory.
+        string baseDir = AppContext.BaseDirectory;
+        string inputDir = Path.Combine(baseDir, "data", "inputs");
+        string outputDir = Path.Combine(baseDir, "data", "outputs");
+
+        // Ensure the output directory exists.
+        Directory.CreateDirectory(outputDir);
+
+        string inputPath = Path.Combine(inputDir, "FilledForm.pdf");
+        string outputPath = Path.Combine(outputDir, "EditPdfPages_out.pdf");
+
+        try
+        {
+            // Create a new instance of PdfPageEditor class.
+            PdfPageEditor pEditor = new PdfPageEditor();
+
+            // Bind an existing PDF file.
+            pEditor.BindPdf(inputPath);
+
+            // Specify an array of pages which need to be manipulated; here only page 1.
+            pEditor.ProcessPages = new int[] { 1 };
+
+            // Alignment related code.
+            pEditor.HorizontalAlignment = HorizontalAlignment.Right;
+
+            // Specify transition type for the pages.
+            pEditor.TransitionType = 2;
+
+            // Specify transition duration.
+            pEditor.TransitionDuration = 5;
+
+            // Display related code.
+            pEditor.PageSize = PageSize.PageLedger;
+            pEditor.Rotation = 90;
+            pEditor.Zoom = 100;
+            pEditor.DisplayDuration = 5;
+
+            // Retrieve current settings.
+            int rotation = pEditor.GetPageRotation(1);
+            PageSize pagesize = pEditor.GetPageSize(1);
+            int totalpages = pEditor.GetPages();
+
+            // Change the origin.
+            pEditor.MovePosition(100, 100);
+
+            // Save the output file.
+            pEditor.Save(outputPath);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error during EditPdfPages example: {ex.Message}");
+        }
+    }
+}

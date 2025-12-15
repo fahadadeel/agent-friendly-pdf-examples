@@ -1,0 +1,90 @@
+using System;
+using System.IO;
+using Aspose.Pdf;
+using Aspose.Pdf.Text;
+using Aspose.Pdf.Facades;
+using System.Drawing;
+
+namespace Examples.Core.AsposePDF.Text;
+
+/// <summary>
+/// Demonstrates searching text in a PDF and drawing rectangles around each found segment.
+/// </summary>
+public class SearchTextAndDrawRectangle
+{
+    /// <summary>
+    /// Executes the example.
+    /// </summary>
+    public static void Run()
+    {
+        try
+        {
+            // Resolve input and output directories relative to the application base directory.
+            string baseDir = AppContext.BaseDirectory;
+            string inputDir = Path.Combine(baseDir, "data", "inputs");
+            string outputDir = Path.Combine(baseDir, "data", "outputs");
+
+            // Ensure the output directory exists.
+            if (!Directory.Exists(outputDir))
+                Directory.CreateDirectory(outputDir);
+
+            // Input and output file paths.
+            string inputPath = Path.Combine(inputDir, "SearchAndGetTextFromAll.pdf");
+            string outputPath = Path.Combine(outputDir, "SearchTextAndDrawRectangle_out.pdf");
+
+            // Open the PDF document.
+            Document document = new Document(inputPath);
+
+            // Create a TextFragmentAbsorber to find all phrases matching the regular expression.
+            TextFragmentAbsorber textAbsorber = new TextFragmentAbsorber(@"[\S]+");
+
+            // Enable regular expression search.
+            TextSearchOptions textSearchOptions = new TextSearchOptions(true);
+            textAbsorber.TextSearchOptions = textSearchOptions;
+
+            // Accept the absorber to search the document.
+            document.Pages.Accept(textAbsorber);
+
+            // Editor used to draw graphics on the PDF.
+            PdfContentEditor editor = new PdfContentEditor(document);
+
+            // Iterate over found text fragments and draw rectangles.
+            foreach (TextFragment textFragment in textAbsorber.TextFragments)
+            {
+                foreach (TextSegment textSegment in textFragment.Segments)
+                {
+                    DrawBox(editor, textFragment.Page.Number, textSegment, Color.Red);
+                }
+            }
+
+            // Save the modified document.
+            document.Save(outputPath);
+
+            Console.WriteLine("\nRectangle drawn successfully on searched text.\nFile saved at " + outputPath);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine("An error occurred while executing SearchTextAndDrawRectangle: " + ex.Message);
+        }
+    }
+
+    // Draws a rectangular polygon around the specified text segment.
+    private static void DrawBox(PdfContentEditor editor, int page, TextSegment segment, Color color)
+    {
+        var lineInfo = new LineInfo
+        {
+            VerticeCoordinate = new[]
+            {
+                (float)segment.Rectangle.LLX, (float)segment.Rectangle.LLY,
+                (float)segment.Rectangle.LLX, (float)segment.Rectangle.URY,
+                (float)segment.Rectangle.URX, (float)segment.Rectangle.URY,
+                (float)segment.Rectangle.URX, (float)segment.Rectangle.LLY
+            },
+            Visibility = true,
+            LineColor = color
+        };
+
+        // The rectangle parameter is unused but required by the API; passing an empty rectangle.
+        editor.CreatePolygon(lineInfo, page, new Rectangle(0, 0, 0, 0), null);
+    }
+}

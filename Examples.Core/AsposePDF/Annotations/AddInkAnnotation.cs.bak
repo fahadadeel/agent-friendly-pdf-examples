@@ -1,0 +1,82 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.IO;
+using Aspose.Pdf;
+using Aspose.Pdf.Annotations;
+using System.Drawing;
+
+namespace Examples.Core.AsposePDF.Annotations;
+
+/// <summary>
+/// Demonstrates how to add an Ink annotation to a PDF document using Aspose.Pdf.
+/// </summary>
+public class AddInkAnnotation
+{
+    /// <summary>
+    /// Executes the example.
+    /// </summary>
+    public static void Run()
+    {
+        try
+        {
+            // Prepare output directory
+            string outputDir = Path.Combine(AppContext.BaseDirectory, "data", "outputs");
+            Directory.CreateDirectory(outputDir);
+
+            // Output file path
+            string outputPath = Path.Combine(outputDir, "AddInkAnnotation_out.pdf");
+
+            // Create a new PDF document and add a page
+            Document doc = new Document();
+            Page pdfPage = doc.Pages.Add();
+
+            // Define the rectangle that covers the whole page
+            Rectangle drect = new Rectangle
+            {
+                Height = (int)pdfPage.Rect.Height,
+                Width = (int)pdfPage.Rect.Width,
+                X = 0,
+                Y = 0
+            };
+            Aspose.Pdf.Rectangle arect = Aspose.Pdf.Rectangle.FromRect(drect);
+
+            // Prepare ink points
+            IList<Point[]> inkList = new List<Point[]>();
+            Aspose.Pdf.Point[] arrpt = new Aspose.Pdf.Point[3];
+            inkList.Add(arrpt);
+            arrpt[0] = new Aspose.Pdf.Point(100, 800);
+            arrpt[1] = new Aspose.Pdf.Point(200, 800);
+            arrpt[2] = new AspNet.Pdf.Point(200, 700); // TODO: verify namespace for Point if needed
+
+            // Create the Ink annotation
+            InkAnnotation ia = new InkAnnotation(pdfPage, arect, inkList)
+            {
+                Title = "XXX",
+                Color = Aspose.Pdf.Color.LightBlue,
+                CapStyle = CapStyle.Rounded,
+                Opacity = 0.5
+            };
+
+            // Set border width
+            Border border = new Border(ia)
+            {
+                Width = 25
+            };
+
+            // Add annotation to the page
+            pdfPage.Annotations.Add(ia);
+
+            // Save the document
+            doc.Save(outputPath);
+
+            Console.WriteLine($"\nInk annotation added successfully.\nFile saved at {outputPath}");
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error during AddInkAnnotation execution: {ex.Message}");
+        }
+    }
+}
+
+// TODO: import or include helper class RunExamples from original source if needed.

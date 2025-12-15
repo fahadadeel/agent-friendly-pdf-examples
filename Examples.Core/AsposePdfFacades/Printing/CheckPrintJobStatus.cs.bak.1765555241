@@ -1,0 +1,143 @@
+using System;
+using System.IO;
+using System.Windows.Forms;
+using Aspose.Pdf;
+using Aspose.Pdf.Facades;
+
+namespace Examples.Core.AsposePdfFacades.Printing;
+
+/// <summary>
+/// Demonstrates checking print job status and related printing operations using Aspose.Pdf Facades.
+/// </summary>
+public class CheckPrintJobStatus
+{
+    /// <summary>
+    /// Executes the printing example, checking the print job status.
+    /// </summary>
+    public static void Run()
+    {
+        try
+        {
+            // Resolve input and output directories relative to the application base directory.
+            string baseDir = AppContext.BaseDirectory;
+            string inputDir = Path.Combine(baseDir, "data", "inputs");
+            string outputDir = Path.Combine(baseDir, "data", "outputs");
+
+            // Ensure the output directory exists.
+            if (!Directory.Exists(outputDir))
+                Directory.CreateDirectory(outputDir);
+
+            // Path to the source PDF file.
+            string inputPdfPath = Path.Combine(inputDir, "input.pdf");
+
+            // Instantiate PdfViewer object.
+            PdfViewer viewer = new PdfViewer();
+
+            // Bind source PDF file.
+            viewer.BindPdf(inputPdfPath);
+            viewer.AutoResize = true;
+
+            // Hide printing dialog.
+            viewer.PrintPageDialog = false;
+
+            // Create Printer Settings object.
+            Aspose.Pdf.Printing.PrinterSettings ps = new Aspose.Pdf.Printing.PrinterSettings();
+            Aspose.Pdf.Printing.PageSettings pgs = new Aspose.Pdf.Printing.PageSettings();
+
+            // Specify the printer name.
+            ps.PrinterName = "Microsoft XPS Document Writer";
+
+            // Resultant Printout name (full path).
+            ps.PrintFileName = Path.Combine(outputDir, "ResultantPrintout.xps");
+
+            // Print the output to file.
+            ps.PrintToFile = true;
+            ps.FromPage = 1;
+            ps.ToPage = 2;
+            ps.PrintRange = Aspose.Pdf.Printing.PrintRange.SomePages;
+
+            // Specify the page size of printout.
+            pgs.PaperSize = new Aspose.Pdf.Printing.PaperSize("A4", 827, 1169);
+            ps.DefaultPageSettings.PaperSize = pgs.PaperSize;
+            pgs.Margins = new Aspose.Pdf.Devices.Margins(0, 0, 0, 0);
+
+            // Print the document with settings specified above.
+            viewer.PrintDocumentWithSettings(pgs, ps);
+
+            // Check the print status.
+            if (viewer.PrintStatus != null)
+            {
+                // An exception was thrown.
+                if (viewer.PrintStatus is Exception ex)
+                {
+                    Console.WriteLine($"Printing error: {ex.Message}");
+                }
+            }
+            else
+            {
+                // No errors were found. Printing job has completed successfully.
+                Console.WriteLine("Printing completed without any issue.");
+            }
+
+            // Close the viewer.
+            viewer.Close();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// Demonstrates setting the printer job name using the current user credentials.
+    /// </summary>
+    public static void GetSetPrintOwnerName()
+    {
+        // Resolve input directory.
+        string baseDir = AppContext.BaseDirectory;
+        string inputDir = Path.Combine(baseDir, "data", "inputs");
+        string inputPdfPath = Path.Combine(inputDir, "input.pdf");
+
+        PdfViewer viewer = new PdfViewer();
+        viewer.BindPdf(inputPdfPath);
+
+        // Specify the name of the print job.
+        viewer.PrinterJobName = GetCurrentUserCredentials();
+    }
+
+    // ExStart:GetCurrentUserCredentials
+    private static string GetCurrentUserCredentials()
+    {
+        // The implementation depends on type of running application (ASP.NET, Windows forms, etc.)
+        string userCredentials = string.Empty;
+        return userCredentials;
+    }
+    // ExEnd:GetCurrentUserCredentials
+
+    /// <summary>
+    /// Demonstrates printing with impersonation.
+    /// </summary>
+    public static void UsingImpersonation()
+    {
+        // Resolve input directory.
+        string baseDir = AppContext.BaseDirectory;
+        string inputDir = Path.Combine(baseDir, "data", "inputs");
+        string inputPdfPath = Path.Combine(inputDir, "input.pdf");
+
+        PdfViewer viewer = new PdfViewer();
+        viewer.BindPdf(inputPdfPath);
+        viewer.PrintPageDialog = false;
+
+        // Do not produce the page number dialog when printing.
+        // TODO: import or include helper class Impersonator from original source
+        using (new Impersonator("OwnerUserName", "SomeDomain", "OwnerUserNamePassword"))
+        {
+            Aspose.Pdf.Printing.PrinterSettings ps = new Aspose.Pdf.Printing.PrinterSettings
+            {
+                PrinterName = "Microsoft XPS Document Writer"
+            };
+            viewer.PrintDocumentWithSettings(ps); // OwnerUserName is a value of Owner column in spooler app
+            viewer.Close();
+        }
+    }
+}

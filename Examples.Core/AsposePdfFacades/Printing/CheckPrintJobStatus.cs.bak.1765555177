@@ -1,0 +1,146 @@
+using System;
+using System.IO;
+using System.Windows.Forms;
+using Aspose.Pdf;
+using Aspose.Pdf.Facades;
+using Aspose.Pdf.Printing;
+using Aspose.Pdf.Devices;
+using System.Drawing.Printing;
+
+namespace Examples.Core.AsposePdfFacades.Printing;
+
+/// <summary>
+/// Demonstrates checking print job status and related printing operations using Aspose.Pdf.Facades.
+/// </summary>
+public class CheckPrintJobStatus
+{
+    /// <summary>
+    /// Executes the example that prints a PDF and checks the print status.
+    /// </summary>
+    public static void Run()
+    {
+        try
+        {
+            // Resolve input and output directories relative to the application base directory.
+            string inputDir = Path.Combine(AppContext.BaseDirectory, "data", "inputs");
+            string outputDir = Path.Combine(AppContext.BaseDirectory, "data", "outputs");
+            Directory.CreateDirectory(outputDir);
+
+            // Path to the source PDF.
+            string inputPdfPath = Path.Combine(inputDir, "input.pdf");
+
+            // Instantiate PdfViewer object.
+            PdfViewer viewer = new PdfViewer();
+
+            // Bind source PDF file.
+            viewer.BindPdf(inputPdfPath);
+            viewer.AutoResize = true;
+
+            // Hide printing dialog.
+            viewer.PrintPageDialog = false;
+
+            // Create printer settings.
+            PrinterSettings ps = new PrinterSettings();
+            PageSettings pgs = new PageSettings();
+
+            // Specify the printer name.
+            ps.PrinterName = "Microsoft XPS Document Writer";
+
+            // Resultant Printout name – place it in the output directory.
+            ps.PrintFileName = Path.Combine(outputDir, "ResultantPrintout.xps");
+
+            // Print the output to file.
+            ps.PrintToFile = true;
+            ps.FromPage = 1;
+            ps.ToPage = 2;
+            ps.PrintRange = PrintRange.SomePages;
+
+            // Specify the page size of printout.
+            pgs.PaperSize = new PaperSize("A4", 827, 1169);
+            ps.DefaultPageSettings.PaperSize = pgs.PaperSize;
+            pgs.Margins = new Margins(0, 0, 0, 0);
+
+            // Print the document with settings specified above.
+            viewer.PrintDocumentWithSettings(pgs, ps);
+
+            // Check the print status.
+            if (viewer.PrintStatus != null)
+            {
+                // An exception was thrown.
+                if (viewer.PrintStatus is Exception ex)
+                {
+                    Console.WriteLine($"Printing error: {ex.Message}");
+                }
+            }
+            else
+            {
+                // No errors were found. Printing job has completed successfully.
+                Console.WriteLine("printing completed without any issue..");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Run error: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// Demonstrates setting the printer job name using the current user credentials.
+    /// </summary>
+    public static void GetSetPrintOwnerName()
+    {
+        try
+        {
+            string inputDir = Path.Combine(AppContext.BaseDirectory, "data", "inputs");
+            string inputPdfPath = Path.Combine(inputDir, "input.pdf");
+
+            PdfViewer viewer = new PdfViewer();
+            viewer.BindPdf(inputPdfPath);
+            viewer.PrinterJobName = GetCurrentUserCredentials();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"GetSetPrintOwnerName error: {ex.Message}");
+        }
+    }
+
+    // ExStart:GetCurrentUserCredentials
+    private static string GetCurrentUserCredentials()
+    {
+        // The implementation depends on type of running application (ASP.NET, Windows forms, etc.)
+        string userCredentials = string.Empty;
+        return userCredentials;
+    }
+    // ExEnd:GetCurrentUserCredentials
+
+    /// <summary>
+    /// Demonstrates printing with impersonation.
+    /// </summary>
+    public static void UsingImpersonation()
+    {
+        try
+        {
+            string inputDir = Path.Combine(AppContext.BaseDirectory, "data", "inputs");
+            string inputPdfPath = Path.Combine(inputDir, "input.pdf");
+
+            PdfViewer viewer = new PdfViewer();
+            viewer.BindPdf(inputPdfPath);
+            viewer.PrintPageDialog = false;
+
+            // TODO: import or include helper class Impersonator from original source
+            using (new Impersonator("OwnerUserName", "SomeDomain", "OwnerUserNamePassword"))
+            {
+                PrinterSettings ps = new PrinterSettings
+                {
+                    PrinterName = "Microsoft XPS Document Writer"
+                };
+                viewer.PrintDocumentWithSettings(ps);
+                viewer.Close();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"UsingImpersonation error: {ex.Message}");
+        }
+    }
+}

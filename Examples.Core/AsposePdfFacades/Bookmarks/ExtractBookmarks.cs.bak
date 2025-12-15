@@ -1,0 +1,57 @@
+using System;
+using System.IO;
+using Aspose.Pdf;
+using Aspose.Pdf.Facades;
+
+namespace Examples.Core.AsposePdfFacades.Bookmarks;
+
+/// <summary>
+/// Demonstrates extracting bookmarks from a PDF document using Aspose.Pdf.Facades.
+/// </summary>
+public class ExtractBookmarks
+{
+    /// <summary>
+    /// Executes the bookmark extraction example.
+    /// </summary>
+    public static void Run()
+    {
+        try
+        {
+            // Resolve input and output directories relative to the application base directory.
+            string baseDir = AppContext.BaseDirectory;
+            string inputDir = Path.Combine(baseDir, "data", "inputs");
+            string outputDir = Path.Combine(baseDir, "data", "outputs");
+
+            // Ensure the output directory exists.
+            Directory.CreateDirectory(outputDir);
+
+            // Path to the source PDF file.
+            string inputPath = Path.Combine(inputDir, "ExtractBookmarks.pdf");
+
+            // Verify the input file exists.
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"Input file not found: {inputPath}");
+                return;
+            }
+
+            // Create PdfBookmarkEditor and bind the PDF.
+            PdfBookmarkEditor bookmarkEditor = new PdfBookmarkEditor();
+            bookmarkEditor.BindPdf(inputPath);
+
+            // Extract bookmarks.
+            Aspose.Pdf.Facades.Bookmarks bookmarks = bookmarkEditor.ExtractBookmarks();
+
+            // Output bookmark information.
+            foreach (Bookmark bookmark in bookmarks)
+            {
+                Console.WriteLine("Title: {0}", bookmark.Title);
+                Console.WriteLine("Page Number: {0}", bookmark.PageNumber);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"An error occurred while extracting bookmarks: {ex.Message}");
+        }
+    }
+}

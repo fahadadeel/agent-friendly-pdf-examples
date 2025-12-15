@@ -1,0 +1,32 @@
+using Aspose.Pdf.Text;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+
+namespace Examples.Core.AsposePDF.Text;
+
+/// <summary>
+/// Demonstrates how to set formatting for an HTML fragment using Aspose.Pdf.
+/// </summary>
+public class SetHTMLStringFormatting
+{
+    /// <summary>
+    /// Executes the example.
+    /// </summary>
+    public static void Run()
+    {
+        try
+        {
+            // ExStart:SetHTMLStringFormatting
+            HtmlFragment html = new HtmlFragment("some text");
+            html.TextState = new TextState();
+            html.TextState.Font = FontRepository.FindFont("Calibri");
+            // ExEnd:SetHTMLStringFormatting
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error in SetHTMLStringFormatting.Run: {ex.Message}");
+        }
+    }
+}

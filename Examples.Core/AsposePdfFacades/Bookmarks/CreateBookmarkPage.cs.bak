@@ -1,0 +1,47 @@
+using System;
+using System.IO;
+using Aspose.Pdf;
+using Aspose.Pdf.Facades;
+
+namespace Examples.Core.AsposePdfFacades.Bookmarks;
+
+/// <summary>
+/// Demonstrates creating a bookmark that points to a specific page in a PDF document using Aspose.Pdf.Facades.
+/// </summary>
+public class CreateBookmarkPage
+{
+    /// <summary>
+    /// Executes the example.
+    /// </summary>
+    public static void Run()
+    {
+        // Resolve base directories
+        string baseDir = AppContext.BaseDirectory;
+        string inputDir = Path.Combine(baseDir, "data", "inputs");
+        string outputDir = Path.Combine(baseDir, "data", "outputs");
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(outputDir);
+
+        // Define file names
+        string inputFile = Path.Combine(inputDir, "CreateBookmark-Page.pdf");
+        string outputFile = Path.Combine(outputDir, "CreateBookmark-Page_out.pdf");
+
+        try
+        {
+            // Open document
+            var bookmarkEditor = new PdfBookmarkEditor();
+            bookmarkEditor.BindPdf(inputFile);
+
+            // Create bookmark of a particular page (page numbers are 1‑based)
+            bookmarkEditor.CreateBookmarkOfPage("Bookmark Name", 2);
+
+            // Save updated PDF file
+            bookmarkEditor.Save(outputFile);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error creating bookmark: {ex.Message}");
+        }
+    }
+}

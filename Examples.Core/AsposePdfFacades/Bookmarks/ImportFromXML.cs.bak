@@ -1,0 +1,63 @@
+using System;
+using System.IO;
+using Aspose.Pdf;
+using Aspose.Pdf.Facades;
+
+namespace Examples.Core.AsposePdfFacades.Bookmarks;
+
+/// <summary>
+/// Demonstrates importing PDF bookmarks from an XML file using Aspose.Pdf.Facades.
+/// </summary>
+public class ImportFromXML
+{
+    /// <summary>
+    /// Executes the bookmark import example.
+    /// </summary>
+    public static void Run()
+    {
+        // Resolve input and output directories relative to the application base directory.
+        string baseDir = AppContext.BaseDirectory;
+        string inputDir = Path.Combine(baseDir, "data", "inputs");
+        string outputDir = Path.Combine(baseDir, "data", "outputs");
+
+        // Ensure the output directory exists.
+        try
+        {
+            if (!Directory.Exists(outputDir))
+            {
+                Directory.CreateDirectory(outputDir);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Failed to create output directory '{outputDir}': {ex.Message}");
+            return;
+        }
+
+        // Define file paths.
+        string inputPdfPath = Path.Combine(inputDir, "ImportFromXML.pdf");
+        string xmlPath = Path.Combine(inputDir, "bookmarks.xml");
+        string outputPdfPath = Path.Combine(outputDir, "ImportFromXML_out.pdf");
+
+        try
+        {
+            // Create PdfBookmarkEditor instance.
+            PdfBookmarkEditor bookmarkEditor = new PdfBookmarkEditor();
+
+            // Bind the source PDF.
+            bookmarkEditor.BindPdf(inputPdfPath);
+
+            // Import bookmarks from the XML file.
+            bookmarkEditor.ImportBookmarksWithXML(xmlPath);
+
+            // Save the updated PDF.
+            bookmarkEditor.Save(outputPdfPath);
+
+            Console.WriteLine($"Bookmarks imported successfully. Output saved to: {outputPdfPath}");
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"An error occurred during bookmark import: {ex.Message}");
+        }
+    }
+}

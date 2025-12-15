@@ -1,0 +1,94 @@
+using System;
+using System.IO;
+using Aspose.Pdf;
+using Aspose.Pdf.Annotations;
+using Aspose.Pdf.Forms;
+using Aspose.Pdf.Text;
+
+namespace Examples.Core.AsposePDF.Text;
+
+public class HiddenTextBlock
+{
+    /// <summary>
+    /// Demonstrates creating a hidden text field that appears on mouse over using Aspose.Pdf.
+    /// </summary>
+    public static void Run()
+    {
+        try
+        {
+            // Resolve input and output directories relative to the application base directory.
+            string baseDir = AppContext.BaseDirectory;
+            string inputDir = Path.Combine(baseDir, "data", "inputs");
+            string outputDir = Path.Combine(baseDir, "data", "outputs");
+
+            // Ensure the output directory exists.
+            if (!Directory.Exists(outputDir))
+                Directory.CreateDirectory(outputDir);
+
+            // Output file path.
+            string outputFile = Path.Combine(outputDir, "TextBlock_HideShow_MouseOverOut_out.pdf");
+
+            // -----------------------------------------------------------------
+            // Create a sample document with a text fragment.
+            // -----------------------------------------------------------------
+            Document doc = new Document();
+            doc.Pages.Add().Paragraphs.Add(new TextFragment("Move the mouse cursor here to display floating text"));
+            doc.Save(outputFile);
+
+            // -----------------------------------------------------------------
+            // Open the document and locate the text fragment.
+            // -----------------------------------------------------------------
+            Document document = new Document(outputFile);
+            TextFragmentAbsorber absorber = new TextFragmentAbsorber("Move the mouse cursor here to display floating text");
+            document.Pages.Accept(absorber);
+            TextFragmentCollection textFragments = absorber.TextFragments;
+
+            // The absorber returns fragments indexed from 1.
+            TextFragment fragment = textFragments[1];
+
+            // -----------------------------------------------------------------
+            // Create a hidden text box field that will appear on mouse over.
+            // -----------------------------------------------------------------
+            TextBoxField floatingField = new TextBoxField(fragment.Page, new Rectangle(100, 700, 220, 740))
+            {
+                Value = "This is the \"floating text field\".",
+                ReadOnly = true,
+                // Make the field invisible when the document is opened.
+                Flags = AnnotationFlags.Hidden,
+                PartialName = "FloatingField_1",
+                // Appearance settings.
+                DefaultAppearance = new DefaultAppearance("Helv", 10, Aspose.Pdf.Color.Blue),
+                Characteristics =
+                {
+                    Background = Aspose.Pdf.Color.LightBlue,
+                    Border = Aspose.Pdf.Color.DarkBlue
+                },
+                Border = new Border(floatingField) { Width = 1 },
+                Multiline = true
+            };
+
+            // Add the hidden text field to the form.
+            document.Form.Add(floatingField);
+
+            // -----------------------------------------------------------------
+            // Create an invisible button over the original text fragment.
+            // -----------------------------------------------------------------
+            ButtonField buttonField = new ButtonField(fragment.Page, fragment.Rectangle);
+            // On mouse enter, show the hidden field; on exit, hide it again.
+            buttonField.Actions.OnEnter = new HideAction(floatingField, false);
+            buttonField.Actions.OnExit = new HideAction(floatingField);
+
+            // Add the button field to the form.
+            document.Form.Add(buttonField);
+
+            // -----------------------------------------------------------------
+            // Save the modified document.
+            // -----------------------------------------------------------------
+            document.Save(outputFile);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error in HiddenTextBlock.Run: {ex.Message}");
+        }
+    }
+}

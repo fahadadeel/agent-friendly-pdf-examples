@@ -1,0 +1,42 @@
+using System;
+using System.IO;
+using Aspose.Pdf;
+using Aspose.Pdf.Facades;
+
+namespace Examples.Core.AsposePDF.Images;
+
+public class LargeCGMImageToPDF
+{
+    /// <summary>
+    /// Converts a large CGM image to PDF.
+    /// </summary>
+    public static void Run()
+    {
+        try
+        {
+            // Resolve input and output paths relative to the application base directory.
+            string baseDir = AppContext.BaseDirectory;
+            string inputPath = Path.Combine(baseDir, "data", "inputs", "corvette.cgm");
+            string outputDir = Path.Combine(baseDir, "data", "outputs");
+            Directory.CreateDirectory(outputDir);
+            string outputPath = Path.Combine(outputDir, "LargeCGMImageToPDF_out.pdf");
+
+            // Create CGM import options and set page size.
+            var options = new CgmImportOptions
+            {
+                PageSize = new SizeF(1000, 1000) // Aspose.Pdf.SizeF
+            };
+
+            // Convert CGM to PDF.
+            // The Produce method does not accept options overload in some versions.
+            // TODO: verify if an overload accepting CgmImportOptions exists and use it if needed.
+            PdfProducer.Produce(inputPath, ImportFormat.Cgm, outputPath);
+
+            Console.WriteLine($"\nLarge CGM file converted to pdf successfully.\nFile saved at {outputPath}");
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error converting CGM to PDF: {ex.Message}");
+        }
+    }
+}

@@ -1,0 +1,53 @@
+using System;
+using System.IO;
+using Aspose.Pdf;
+using Aspose.Pdf.Annotations;
+
+/// <summary>
+/// Demonstrates creating an invisible free text annotation using Aspose.Pdf.
+/// </summary>
+namespace Examples.Core.AsposePDF.Annotations;
+
+public class InvisibleAnnotation
+{
+    /// <summary>
+    /// Executes the example.
+    /// </summary>
+    public static void Run()
+    {
+        try
+        {
+            // Resolve input and output paths relative to the application base directory.
+            string baseDir = AppContext.BaseDirectory;
+            string inputPath = Path.Combine(baseDir, "data", "inputs", "input.pdf");
+            string outputDir = Path.Combine(baseDir, "data", "outputs");
+            string outputPath = Path.Combine(outputDir, "InvisibleAnnotation_out.pdf");
+
+            // Ensure the output directory exists.
+            Directory.CreateDirectory(outputDir);
+
+            // Open document
+            Document doc = new Document(inputPath);
+
+            // Create a free text annotation with red appearance.
+            var rect = new Aspose.Pdf.Rectangle(50, 600, 250, 650);
+            var appearance = new DefaultAppearance("Helvetica", 16, Aspose.Pdf.Color.FromRgb(255, 0, 0));
+            FreeTextAnnotation annotation = new FreeTextAnnotation(doc.Pages[1], rect, appearance);
+            annotation.Contents = "ABCDEFG";
+            annotation.Characteristics.Border = Aspose.Pdf.Color.FromRgb(255, 0, 0);
+            annotation.Flags = AnnotationFlags.Print | AnnotationFlags.NoView;
+
+            // Add annotation to the first page.
+            doc.Pages[1].Annotations.Add(annotation);
+
+            // Save output file
+            doc.Save(outputPath);
+
+            Console.WriteLine($"\nAnnotation invisible successfully.\nFile saved at {outputPath}");
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error during InvisibleAnnotation example: {ex.Message}");
+        }
+    }
+}

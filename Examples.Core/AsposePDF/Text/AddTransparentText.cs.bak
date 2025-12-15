@@ -1,0 +1,75 @@
+using System;
+using System.IO;
+using Aspose.Pdf;
+using Aspose.Pdf.Text;
+using Aspose.Pdf.Drawing;
+using System.Drawing;
+
+namespace Examples.Core.AsposePDF.Text;
+
+/// <summary>
+/// Demonstrates how to add transparent text and a semi‑transparent rectangle to a PDF document using Aspose.Pdf.
+/// </summary>
+public class AddTransparentText
+{
+    /// <summary>
+    /// Executes the example.
+    /// </summary>
+    public static void Run()
+    {
+        try
+        {
+            // Resolve base directories
+            string baseDir = AppContext.BaseDirectory;
+            string inputDir = Path.Combine(baseDir, "data", "inputs");
+            string outputDir = Path.Combine(baseDir, "data", "outputs");
+            Directory.CreateDirectory(outputDir);
+
+            // Create a new PDF document
+            Document doc = new Document();
+
+            // Add a page to the document
+            Page page = doc.Pages.Add();
+
+            // Create a Graph object (canvas) with specified dimensions
+            Graph canvas = new Graph(100.0, 400.0);
+
+            // Create a rectangle shape
+            Rectangle rect = new Rectangle(100, 100, 400, 400);
+
+            // Set rectangle fill color with alpha channel (semi‑transparent)
+            // NOTE: System.Drawing is used here as in the original example; consider replacing with a cross‑platform approach.
+            rect.GraphInfo.FillColor = Color.FromRgb(Color.FromArgb(128, Color.FromArgb(12957183)));
+
+            // Add rectangle to the canvas
+            canvas.Shapes.Add(rect);
+
+            // Add the canvas to the page
+            page.Paragraphs.Add(canvas);
+            canvas.IsChangePosition = false;
+
+            // Create a TextFragment with sample text
+            TextFragment text = new TextFragment(
+                "transparent text transparent text transparent text transparent text transparent text transparent text transparent text transparent text transparent text transparent text transparent text transparent text transparent text transparent text transparent text transparent text ");
+
+            // Set text color with alpha channel (more transparent)
+            Aspose.Pdf.Color textColor = Aspose.Pdf.Color.FromArgb(30, 0, 255, 0);
+            text.TextState.ForegroundColor = textColor;
+
+            // Add text to the page
+            page.Paragraphs.Add(text);
+
+            // Save the document
+            string outputPath = Path.Combine(outputDir, "AddTransparentText_out.pdf");
+            doc.Save(outputPath);
+
+            Console.WriteLine($"\nTransparent text added successfully.\nFile saved at {outputPath}");
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error executing AddTransparentText example: {ex.Message}");
+        }
+    }
+}
+
+// TODO: import or include helper class RunExamples from original source if needed.
